@@ -1,0 +1,86 @@
+.navigation{
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 30px;
+}
+
+/* .navigation h2 {
+} */
+
+.navigation-links {
+  display: flex;
+  justify-content: space-evenly;
+
+}
+.navigation-links ul{
+  list-style: none;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.navigation-links a{
+  text-decoration: none;
+  color: white;
+}
+
+.navigation-links a:hover{
+  text-decoration: none;
+  color: rgb(167, 167, 167);
+}
+
+@media only screen and (min-width: 992px) {
+  .user-form {
+    margin: auto;
+    margin-top: 7%;
+    width:35%;
+    padding-bottom: 5%;
+    border: 1px solid rgb(187, 187, 187);
+    border-radius: 5px;
+  }
+}
+
+@media only screen and (max-width: 992px) {
+  .user-form {
+    margin: auto;
+    margin-top: 10%;
+    width:80%;
+  }
+}
+
+.navigation-links li {
+  margin-right: 15px;
+  font-size: large;
+}
+
+.navigation-links ul:last-child{
+  margin-right: 30px;
+}
+
+.login-btn:hover{
+  background-color: rgb(4, 9, 31);
+}
+
+.color-primary{
+  background-color: rgb(6, 14, 48);
+  color:white;
+}
+
+.btn-margin {
+  margin-right: 5%;
+}
+
+input[type="checkbox"]{
+  margin-left: 5px;
+}
+
+.head {
+  display: flex;
+  padding: 10px;
+  justify-content: space-between;
+}
+
+.btn-create {
+  margin-right: 50px;
+}
