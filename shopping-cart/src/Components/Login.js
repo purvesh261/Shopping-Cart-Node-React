@@ -35,7 +35,7 @@ function Login() {
             loginSettings.setLogin(true);
             loginSettings.setCurrentUser(res.data[0]);
             loginSettings.setCart(res.data[0].cart);
-            res.data[0].admin? navigate("/admin"): navigate("/");
+            res.data[0].admin? navigate("/admin/users"): navigate("/");
           }
           else
           {

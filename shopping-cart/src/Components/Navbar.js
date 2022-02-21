@@ -31,9 +31,9 @@ function Navbar(props)
                         loggedIn?
                             isAdmin?
                                 <ul>
-                                    <Link to="/admin"><li>Home</li></Link>
                                     <Link to="/admin/users"><li>Users</li></Link>
                                     <Link to="/admin/products"><li>Products</li></Link>
+                                    <Link to="/admin/sales"><li>Sales</li></Link>
                                     <Link to="/"><li onClick={() => logout()}>Logout</li></Link>
                                 </ul>
                             :
@@ -46,7 +46,7 @@ function Navbar(props)
                         :
                         <ul>
                             <Link to="/"><li>Home</li></Link>
-                            <Link to="/cart"><li>Cart</li></Link>
+                            <Link to="/cart"><li>Cart <span className='text-info'>({loginSettings.cart.length})</span></li></Link>
                             <Link to="/login"><li>Login</li></Link>
                             <Link to="/sign-up"><li>Sign Up</li></Link>
                         </ul>

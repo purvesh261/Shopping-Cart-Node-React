@@ -10,6 +10,7 @@ import SignUp from './Components/SignUp';
 import Admin from './Components/Admin';
 import AdminUsers from './Components/Admin/AdminUsers';
 import AdminProducts from './Components/Admin/AdminProducts';
+import Sales from './Components/Admin/Sales';
 
 export const LoginDetails = createContext({});
 
@@ -38,7 +39,9 @@ function App() {
           <Route path="/sign-up" element={<SignUp/>}/>
           <Route path="/admin" element={<Admin />}/>
           <Route path="/admin/users" element={<AdminUsers />}/>
-          <Route path="/admin/products" element={<AdminProducts />}/> 
+          <Route path="/admin/products" element={<AdminProducts />}/>
+          <Route path="/admin/sales" element={<Sales />}/>
+
           <Route path="*" element={<h3>404 - Page not found</h3>}/>
         </Routes>
       </div>

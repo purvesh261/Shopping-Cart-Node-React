@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import CreateUser from './CreateUser';
 import '../../App.css'
 import axios from 'axios';
 
@@ -8,6 +9,7 @@ function AdminUsers() {
     const [editIndex, setEditIndex] = useState();
     const [editForm, setEditForm] = useState({username:"", email:"", admin:false, status:false});
     const [alert, setAlert] = useState("");
+    const [userAdded, setUserAdded] = useState(false);
     var [deleteIndex, setDeleteIndex] = useState();
 
     var getUsers = () => {
@@ -23,7 +25,7 @@ function AdminUsers() {
     }
     useEffect(() => {
         getUsers();
-      }, []);
+      }, [userAdded]);
     
     var onChangeHandler = (event) => {
         let {name, value} = event.target;
@@ -80,20 +82,15 @@ function AdminUsers() {
             })
     }
 
-    var onDeleteNo = () => 
-    {
-        setDeleteIndex(null);
-    }
-
     return (
         <>
         
             <div className='row'>
-                <div className='col-12'>
-                    <div className='head'>
-                        <h2>Users</h2>
-                        <button className='btn btn-primary btn-create'>Create User</button>
-                    </div>
+                <div className='col-md-4 col-sm-12 nopadding'>
+                    <CreateUser setUserAdded={setUserAdded} userAdded={userAdded}/>
+                </div>
+                <div className='col-md-8 col-sm-12 mt-5'>
+                    <h3>Users</h3>
                 
                     <div className="table-responsive">
                     {alert && <div className="alert alert-success m-3">{alert}</div>}
@@ -102,7 +99,7 @@ function AdminUsers() {
                             <h5 className="alert-heading">Delete Employee</h5>
                             Are you sure you want to delete this employee?<br/>
                             <button className='btn btn-danger my-3 mx-1 px-4' onClick={onDeleteYes}>Yes</button>
-                            <button className='btn bg-white text-danger my-3 mx-1 px-4' onClick={onDeleteNo}>No</button>
+                            <button className='btn bg-white text-danger my-3 mx-1 px-4' onClick={() => setDeleteIndex(null)}>No</button>
                         </div>
                     }
                 <table className="table">

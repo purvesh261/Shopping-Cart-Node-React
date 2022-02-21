@@ -5,7 +5,7 @@ import { LoginDetails } from '../App.js';
 import axios from 'axios';
 
 
-function Signup(props) {
+function Signup() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
