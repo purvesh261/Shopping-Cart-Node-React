@@ -3,6 +3,7 @@ const User = require('../model/users.model');
 
 exports.getUsers = (req, res) => {
     User.find()
+        .populate('cart.product')
         .then(users => {
             res.send(users);
         })
@@ -33,6 +34,17 @@ exports.createUser = (req, res) => {
 
 exports.updateUser = (req, res) => {
     User.findByIdAndUpdate(req.params.id, req.body)
+        .then(user => {
+            res.send(user);
+        })
+        .catch(err => {
+            res.send('Error: ' + err);
+        });
+}
+
+exports.updateCart = (req, res) => {
+    let cartQuery = {$set: {cart: req.body.cart}};
+    User.findByIdAndUpdate(req.params.id, cartQuery)
         .then(user => {
             res.send(user);
         })

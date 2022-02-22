@@ -5,6 +5,8 @@ var cors = require('cors')
 const mongoose = require('mongoose');
 const products  = require('./routes/products.route');
 const users = require('./routes/users.route');
+const orders = require('./routes/orders.route');
+const mrinwards = require('./routes/mrinward.route');
 
 const app = express();
 
@@ -12,6 +14,8 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: true}));
 app.use('/users', users);
 app.use('/products', products);
+app.use('/orders', orders);
+app.use('/mrinwards', mrinwards);
 app.use(cors());
 app.all('*', function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
