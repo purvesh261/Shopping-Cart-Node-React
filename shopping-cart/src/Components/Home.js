@@ -11,7 +11,6 @@ export default function Home(props) {
     axios.get('/users/')
       .then(res => {
         setData(res.data);
-        console.log("data", res.data)
       })
       .catch(err => {
         console.log(err);
@@ -20,7 +19,6 @@ export default function Home(props) {
     axios.get('/products/')
       .then(res => {
         setProducts(res.data);
-        console.log("data", res.data)
         setLoading(false);
       })
       .catch(err => {
@@ -40,7 +38,7 @@ export default function Home(props) {
                 <div className="form-outline w-75">
                   <input type="search" className="form-control p-2" placeholder='Search products'/>
                 </div>
-                <button type="submit" className="btn btn-primary">
+                <button type="submit " className="rounded submit p-2 px-4 color-primary login-btn">
                   Search
                 </button>
               </div>
@@ -48,11 +46,11 @@ export default function Home(props) {
         </div>
         <div className="col-md-3 options">
           <select>
-            <option>Sort by</option>
-            <option>Price: Low to High</option>
-            <option>Price: High to Low</option>
-            <option>Newest</option>
-            <option>Oldest</option>
+            <option value="0">Sort by</option>
+            <option value="1">Price: Low to High</option>
+            <option value="2">Price: High to Low</option>
+            <option value="3">Newest</option>
+            <option value="4">Oldest</option>
           </select>
           <select>
             <option>Category</option>

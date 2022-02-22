@@ -12,12 +12,27 @@ function Login() {
   const navigate = useNavigate();
   const loginSettings = useContext(LoginDetails);
 
+  var mergeCarts = (userCart, guestCart) =>
+  {
+    var newCart = [];
+    for (let i = 0; i < userCart.length; i++) {
+      for(let j = 0; j < guestCart.length; j++){
+        if(userCart[i].product._id === guestCart[j].product._id){
+          userCart[i].quantity = guestCart[j].quantity;
+          guestCart.splice(j, 1);
+        }
+      }
+    }
+    newCart = [...userCart, ...guestCart];
+    loginSettings.setCart(newCart);
+    loginSettings.currentUser.cart = newCart;
+    loginSettings.setCurrentUser(loginSettings.currentUser);
+    loginSettings.updateCart(newCart);
+  }
 
   var onLogin = (event) => 
   {
     event.preventDefault();
-    console.log(loginSettings,"hahah")
-    console.log(username, password);
     if (!(username && password))
     {
       setAlert("Enter username and password");
@@ -25,16 +40,14 @@ function Login() {
     }
     else{
       axios.get(`/users/username/${username}`).then((res) => {
-        if(res.data)
+        if(res.data.length > 0)
         {
           if(res.data[0].password === password)
           {
             loginSettings.loggedIn = true;
-            loginSettings.cart = res.data[0].cart;
             loginSettings.currentUser = res.data[0];
             loginSettings.setLogin(true);
-            loginSettings.setCurrentUser(res.data[0]);
-            loginSettings.setCart(res.data[0].cart);
+            mergeCarts(res.data[0].cart, loginSettings.cart);
             res.data[0].admin? navigate("/admin/users"): navigate("/");
           }
           else
@@ -45,7 +58,7 @@ function Login() {
         }
         else
         {
-          setAlert("Username does not exist");
+          setAlert("User does not exist");
           setTimeout(() => setAlert(""),2000)
         }
     });

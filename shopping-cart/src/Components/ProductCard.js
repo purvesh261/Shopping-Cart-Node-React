@@ -30,9 +30,11 @@ function ProductCard(props) {
         {
             loginSettings.currentUser.cart = loginSettings.cart;
             loginSettings.setCurrentUser(loginSettings.currentUser);
+            loginSettings.updateCart(loginSettings);
         }
-        console.log(loginSettings.cart, "cart");
-        console.log(loginSettings.currentUser, "current user");
+        console.log(loginSettings.cart);
+        console.log(loginSettings.currentUser);
+
         loginSettings.setCart(loginSettings.cart);
         
     }
@@ -49,7 +51,6 @@ function ProductCard(props) {
                         <div className="input-group">
                             <div className="form-outline">
                                 <select className='form-control' name='quantity' value={quantity} onChange={(e) => setQuantity(e.target.value)}>
-                                    <option>Qty</option>
                                     <option>1</option>
                                     <option>2</option>
                                     <option>3</option>
@@ -57,7 +58,7 @@ function ProductCard(props) {
                                     <option>5</option>
                                 </select>
                             </div>
-                            <button type='submit' className="btn btn-primary">Add to cart</button>
+                            <button type='submit' className="rounded submit px-3 color-primary login-btn">Add to cart</button>
                         </div>
                     </form>
                 </div>
