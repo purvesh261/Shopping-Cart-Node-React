@@ -14,6 +14,7 @@ exports.getUsers = (req, res) => {
 
 exports.getUserByUsername = (req, res) => {
     User.find({username: req.params.username})
+        .populate('cart.product')
         .then(user => {
             res.send(user);
         })
@@ -34,6 +35,7 @@ exports.createUser = (req, res) => {
 
 exports.updateUser = (req, res) => {
     User.findByIdAndUpdate(req.params.id, req.body)
+        .populate('cart.product')
         .then(user => {
             res.send(user);
         })
@@ -45,6 +47,7 @@ exports.updateUser = (req, res) => {
 exports.updateCart = (req, res) => {
     let cartQuery = {$set: {cart: req.body.cart}};
     User.findByIdAndUpdate(req.params.id, cartQuery)
+        .populate('cart.product')
         .then(user => {
             res.send(user);
         })
@@ -53,8 +56,21 @@ exports.updateCart = (req, res) => {
         });
 }
 
+// exports.removeItemFromCart = (req, res) => {
+//     let cartQuery = {$pull: {cart: {product: req.params.id}}};
+//     User.findByIdAndUpdate(req.params.id, cartQuery)
+//         .populate('cart.product')
+//         .then(user => {
+//             res.send(user);
+//         })
+//         .catch(err => {
+//             res.send('Error: ' + err);
+//         });
+// }
+
 exports.deleteUser = (req, res) => {
     User.findByIdAndRemove(req.params.id)
+    .populate('cart.product')
     .then(user => {
         res.send(user);
     })
