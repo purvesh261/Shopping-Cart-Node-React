@@ -8,8 +8,10 @@ let productSchema = new Schema({
     quantity: {type: Number, required: true},
     supplier: {type: String, maxlength: 40, required: true},
     description: {type: String, maxlength: 200, required: false},
+    category: {type: String, required: true},
     status: {type: Boolean, required: true},
-    images: [{type: String, maxlength: 200, required: false}],
+    images: [{type: String, maxlength: 300, required: false}],
+    dateAdded: {type: Date, default: Date.now, required: true},
 });
 
 module.exports = mongoose.model('Product', productSchema);

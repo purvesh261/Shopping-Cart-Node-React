@@ -6,11 +6,11 @@ let MRInwardSchema = new Schema({
     MRInwardNo: {type: String, required: true},
     MRInwardDate: {type: Date, default: Date.now},
     Supplier: {type: String, required: true},
-    MRInwardDetails: [{
-        Product: {type: String, required: true},
-        Quantity: {type: Number, required: true},
-        Rate: {type: Number, required: true},
-        Amount: {type: Number, required: true}
+    MRInwardItems: [{
+        product: {type: String, required: true},
+        quantity: {type: Number, required: true},
+        rate: {type: Number, required: true},
+        amount: {type: Number, required: true}
     }],
     MRInwardTotal: {type: Number, required: true}
 });
