@@ -45,8 +45,8 @@ function ProductCard(props) {
                 <img src={image} alt="Product image" className="card-img-top"/>
                 <div className="card-body">
                     <h5 className="card-title">{product.name}</h5>
-                    <p className="card-text">{product.description}</p>
-                    <p className="card-text">{product.price}</p>
+                    <p className="card-text text-secondary">{product.description}</p>
+                    <h5 className="card-text">Price: {product.price}</h5>
                     <form onSubmit={addToCart}>
                         <div className="input-group">
                             <div className="form-outline">

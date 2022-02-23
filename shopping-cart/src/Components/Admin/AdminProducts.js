@@ -97,8 +97,8 @@ function AdminProducts() {
                     {alert && <div className="alert alert-success m-3">{alert}</div>}
                     {deleteIndex &&
                         <div className="alert alert-danger m-3" role="alert">
-                            <h5 className="alert-heading">Delete Employee</h5>
-                            Are you sure you want to delete this employee?<br/>
+                            <h5 className="alert-heading">Delete Product</h5>
+                            Are you sure you want to delete this product?<br/>
                             <button className='btn btn-danger my-3 mx-1 px-4' onClick={onDeleteYes}>Yes</button>
                             <button className='btn bg-white text-danger my-3 mx-1 px-4' onClick={onDeleteNo}>No</button>
                         </div>
