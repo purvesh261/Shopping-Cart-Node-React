@@ -1,5 +1,6 @@
 const Product = require('../model/products.model');
 var fs = require('fs');
+const { userInfo } = require('os');
 
 exports.getProducts = (req, res) => {
     Product.find()
@@ -32,10 +33,8 @@ exports.getProductById = (req, res) => {
 }
 
 exports.createProduct = (req, res) => {
-    console.log(req.body);
     let product = new Product(req.body);
-
-    if (req.file) {
+    if (req.files) {
         let image = req.files.images;
         let imageName = Date.now() + '-' + image.name;
         let dir = './public/products/' + product._id + '/';
@@ -49,12 +48,13 @@ exports.createProduct = (req, res) => {
             }
             else
             {
-                product.images.push(dir + imageName);
+                product.images = imageName;
+                product.save();
             }
         });
     }
     else{
-        product.images = [];
+        product.images = null;
     }
 
     product.save()
@@ -68,7 +68,7 @@ exports.createProduct = (req, res) => {
 
 
 exports.updateProduct = (req,res) => {
-    Product.findByIdAndUpdate(req.params.id, req.body)
+    Product.findByIdAndUpdate(req.params.id, {$set: req.body})
         .then(product => {
             res.send(product);
         })
@@ -76,6 +76,18 @@ exports.updateProduct = (req,res) => {
             res.send('Error: ' + err)
         });
 }
+
+exports.updateProductStock = (req,res) => {
+    Product.findByIdAndUpdate(req.params.productID, {$inc: {stock: -req.body.orderQuantity}})
+        .then(product => {
+            res.json({message: "Order Placed Successfully", success: true});
+        })
+        .catch(err => {
+            res.send('Error: ' + err)
+        });
+}
+
+
 
 exports.deleteProduct = (req, res) => {
     Product.findByIdAndRemove(req.params.id)

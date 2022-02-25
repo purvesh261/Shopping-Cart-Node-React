@@ -15,14 +15,20 @@ function Login() {
   useEffect(() => {
       if(contextData.loggedIn)
       {
+        if(contextData.currentUser.admin)
+        {
+          navigate("/admin/users");
+        }
+        else
+        {
           navigate("/");
+        } 
       }
   },[]);
   
   useEffect(() => {
     if (contextData.loggedIn === true)
     {
-      console.log(contextData.currentUser.cart, contextData.cart, contextData.currentUser.cart.length);
       mergeCarts(contextData.currentUser.cart, contextData.cart);
       contextData.currentUser.admin? navigate("/admin/users"): navigate("/");
     }
@@ -58,7 +64,6 @@ function Login() {
     else
     {
       axios.post('/users/authenticate', { username, password }).then((res) => {
-        console.log(res, "res");
         if (!res.data.error)
         {
           contextData.setLogin(true);

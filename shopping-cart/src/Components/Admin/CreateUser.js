@@ -25,7 +25,6 @@ function CreateUser(props) {
       }
       axios.get(`/users/username/${username}`)
         .then(res => {
-          console.log(res.data)
           if (res.data.length > 0) {
             setAlert("Username already exists");
             setTimeout(() => setAlert(""), 2000)
@@ -43,7 +42,6 @@ function CreateUser(props) {
     var onSubmit = (event) => 
     {
       event.preventDefault();
-      console.log(event.target);
       if (!(username && email && password && confirmPassword))
       {
         setAlert("Enter all the fields");
@@ -74,7 +72,6 @@ function CreateUser(props) {
         setTimeout(() => setAlert(""),2000)
       }
       else{
-          console.log(admin, status, "ajlgjaewglawjs")
         let newUser = {
           username: username,
           email: email,
@@ -86,7 +83,6 @@ function CreateUser(props) {
   
         axios.post("/users/", newUser )
         .then(res => {
-            console.log(res.data)
             setUsername("");
             setEmail("");
             setPassword("");

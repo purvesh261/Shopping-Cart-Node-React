@@ -19,7 +19,7 @@ function AdminUsers() {
     useEffect(() => {
         if(!contextData.loggedIn || !contextData.currentUser.admin)
         {
-            navigate("/");
+            navigate("/login");
         }
     },[]);
 
@@ -28,7 +28,6 @@ function AdminUsers() {
           .then(res => {
             setUsers(res.data)
             setLoading(false);
-            console.log("data", res.data)
           })
           .catch(err => {
             console.log(err);

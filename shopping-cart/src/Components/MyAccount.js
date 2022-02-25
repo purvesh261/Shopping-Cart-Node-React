@@ -1,14 +1,21 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { LoginDetails } from '../App';
 import axios from 'axios';
 import image from '../assets/img-prod.jpg';
-import { LoginDetails } from '../App';
+
 
 function MyAccount() {
     const [ orders, setOrders ] = useState([]);
     const [ loading, setLoading ] = useState(true);
     const contextData = useContext(LoginDetails);
+    const navigate = useNavigate();
 
     useEffect( () => {
+        if(!contextData.loggedIn)
+        {
+            navigate("/login");
+        }
         axios.get(`orders/${contextData.currentUser._id}/user`)
             .then(res => {
                 setOrders([ ...res.data ]);
@@ -45,7 +52,7 @@ function MyAccount() {
                             return(
                                 <>
                                     <p>
-                                        <b>{product.product.name}</b><br/>
+                                        {product.product ? <b>{product.product.name}</b> : <b className='text-danger'>[Deleted Product]</b>}<br/>
                                         Quantity: {product.quantity}<br/>
                                     </p>
                                 </>

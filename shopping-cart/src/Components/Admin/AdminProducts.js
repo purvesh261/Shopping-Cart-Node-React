@@ -1,22 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { LoginDetails } from '../../App.js';
 import '../../App.css';
 import axios from 'axios';
 
 function AdminProducts() {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [editIndex, setEditIndex] = useState();
+    const [displayIndex, setDisplayIndex] = useState();
+    const [edit, setEdit] = useState(false);
     const [editForm, setEditForm] = useState({});
     const [alert, setAlert] = useState("");
     var [deleteIndex, setDeleteIndex] = useState();
+    const navigate = useNavigate();
+    const contextData = useContext(LoginDetails);
 
     var getProducts = () => {
         axios.get('/products/')
           .then(res => {
             setProducts(res.data)
             setLoading(false);
-            console.log("data", res.data)
           })
           .catch(err => {
             console.log(err);
@@ -24,34 +27,28 @@ function AdminProducts() {
     }
 
     useEffect(() => {
-      getProducts();
+        if(!contextData.loggedIn || !contextData.currentUser.admin)
+        {
+            navigate("/login");
+        }
+        getProducts();
       }, []);
     
     var onChangeHandler = (event) => {
         let {name, value} = event.target;
-        if(name === "admin" || name === "status")
+        if(name === "status")
         {
            value = event.target.checked; 
         }
         setEditForm({...editForm, [name]: value});
     }
 
-    var editUser = (index) => {
-        setEditIndex(index);
-        if(index != null)
-        {
-            setEditForm(
-                {}
-            );
-        }
-    }
-
     var onSave = (event) => {
         event.preventDefault();
-        axios.put(`/products/${products[editIndex]._id}/update`, editForm)
+        axios.put(`/products/${editForm._id}/update`, editForm)
             .then(res => {
                 setProducts(products.map((product, i) => {
-                    if(i === editIndex)
+                    if(i === displayIndex)
                     {
                         return {...product, ...editForm};
                     }
@@ -59,12 +56,32 @@ function AdminProducts() {
                     setTimeout(() => setAlert(""), 2000);
                     return product;
                 }))
-                setEditIndex(null);
+                setDisplayIndex(null);
             })
             .catch(err => {
                 console.log("Error: " + err);
             });
     }
+
+    var deleteProductFromCart = (productID) => {
+
+        axios.put(`/users/${productID}/cart/remove`, {productID: productID})
+            .then(res => {
+            })
+            .catch(err => {
+                console.log(err);
+            });
+        };
+
+    var deleteProductFromMR = async (productID) => {
+        try{
+            var res = await axios.put(`/mrinwards/${productID}/items/remove`);
+        }
+        catch(err)
+        {
+            console.log(err);
+        }
+    };
 
     var onDeleteYes = () => 
     {
@@ -72,6 +89,8 @@ function AdminProducts() {
             .then(res => {
                 setLoading(true)
                 getProducts()
+                deleteProductFromMR(res.data._id)
+                deleteProductFromCart(res.data._id)
                 setDeleteIndex(null);
             })
             .catch(err => {
@@ -92,6 +111,22 @@ function AdminProducts() {
         return `${dateString}/${monthString}/${date.getFullYear()}`;
     }
 
+    var displayDetails = (index) => {
+        if(index === displayIndex)
+        {
+            setDisplayIndex(null);
+            setEdit(false);
+        }
+        else
+        {
+            setDisplayIndex(index);
+        }
+    }
+
+    var viewEditForm = (product) => {
+        setEditForm(product);
+        setEdit(true);
+    }
 
     return (
         <>
@@ -137,28 +172,66 @@ function AdminProducts() {
                                         <td>₹ {product.price}/-</td>
                                         <td><input type="checkbox" checked={product.status} /></td>
                                         <td>
-                                            <button className='btn btn-primary btn-margin' onClick={() => editIndex === idx? setEditIndex(null) : setEditIndex(idx)}>View Details</button>
+                                            <button className='btn btn-primary btn-margin' onClick={() => displayDetails(idx)}>View Details</button>
                                         </td>
                                         <td>
                                             <button className='btn btn-danger btn-margin' onClick={() => setDeleteIndex(idx)}>Delete</button>
                                         </td>
                                     </tr>
-                                    { editIndex === idx?
+                                    { displayIndex === idx?
                                         <tr key="-1">
                                             <td colSpan="6" className='bg-secondary'>
                                                   <div className="card">
-                                                      <div className="card-header">   
-                                                          <h5>Product</h5>
-                                                          
+                                                      <div className="card-header d-flex justify-content-between">   
+                                                          <h5>Product# {product._id}</h5>
+                                                          <button className='btn btn-success btn-margin' onClick={() => viewEditForm(product)}>Edit</button>
                                                       </div>
+                                                          
                                                       <div className="card-body">
-                                                        <h6>Product: {product.name}</h6>
-                                                        <h6>Price: ₹ {product.price}/-</h6>
-                                                        <h6>Quantity: {product.stock}</h6>
-                                                        <h6>Description: {product.description}</h6>
-                                                        <h6>Category: {product.category}</h6>
-                                                        <h6>Status: {product.status ? "Active" : "Disabled"}</h6>
-                                                        <h6>Created On: {formatDate(new Date(product.dateAdded))}</h6>
+                                                          {
+                                                                edit ?
+                                                                <form onSubmit={onSave}>
+                                                                    <div className="form-group w-25 mb-3">
+                                                                        <label htmlFor="name">Name</label>
+                                                                        <input type="text" className="form-control" name="name" value={editForm.name} onChange={onChangeHandler} placeholder="Enter name" required/>
+                                                                    </div>
+                                                                    <div className="form-group w-25 mb-3">
+                                                                        <label htmlFor="price">Price</label>
+                                                                        <input type="number" className="form-control" name="price" value={editForm.price} onChange={onChangeHandler} placeholder="Enter price" required/>
+                                                                    </div>
+                                                                    <div className="form-group w-25 mb-3">
+                                                                        <label htmlFor="stock">Stock</label>
+                                                                        <input type="number" className="form-control" name="stock" value={editForm.stock} onChange={onChangeHandler} placeholder="Enter stock" required/>
+                                                                    </div>
+                                                                    <div className="form-group w-25 mb-3">
+                                                                        <label htmlFor="description">Description</label>
+                                                                        <textarea type="textarea" rows={5} className='form-control' name="description" value={editForm.description} onChange={onChangeHandler} placeholder='Write a description of the product' ></textarea>
+                                                                    </div>
+                                                                    <div className="form-group w-25 mb-3">
+                                                                        <label htmlFor="category">Category</label>
+                                                                        <input type="text" className="form-control" name="category" value={editForm.category} onChange={onChangeHandler} placeholder="Enter category" required/>
+                                                                    </div>
+                                                                    <div className="form-group mb-3">
+                                                                        <label htmlFor="status">Status: </label>
+                                                                        <input type="checkbox" className="form-check-input" name="status" checked={editForm.status} value={editForm.status} onChange={onChangeHandler} required/>
+                                                                    </div>
+                                                                    <button type="submit" className="btn btn-primary m-2">Save</button>
+                                                                    <button type="button" className="btn btn-danger" onClick={() => setEdit(false)}>Cancel</button>
+                                                                </form>
+                                                                :
+                                                                <>
+                                                                    <h6>Product: {product.name}</h6>
+                                                                    <h6>Price: ₹ {product.price}/-</h6>
+                                                                    <h6>Quantity: {product.stock}</h6>
+                                                                    <h6>Description: {product.description}</h6>
+                                                                    <h6>Category: {product.category}</h6>
+                                                                    <h6>Status: {product.status ? "Active" : "Disabled"}</h6>
+                                                                    <h6>Created On: {formatDate(new Date(product.dateAdded))}</h6>
+                                                                </>
+                                                                
+
+                                                          }
+                                                        
                                                     </div>
                                                     </div>
                                                 

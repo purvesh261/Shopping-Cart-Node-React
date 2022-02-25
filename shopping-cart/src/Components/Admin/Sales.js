@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { LoginDetails } from '../../App.js';
+import { Link, useNavigate } from 'react-router-dom';
 import '../../App.css';
-import { Link } from 'react-router-dom';
 import axios from 'axios';
 
 function Sales() {
@@ -9,13 +10,14 @@ function Sales() {
   const [displayIndex, setDisplayIndex] = useState();
   const [deleteIndex, setDeleteIndex] = useState();
   const [alert, setAlert] = useState("");
+  const contextData = useContext(LoginDetails);
+  const navigate = useNavigate();
 
   var getSales = () => {
     axios.get('/orders/')
       .then(res => {
         setSales(res.data)
         setLoading(false);
-        console.log("data", res.data)
       })
       .catch(err => {
         console.log(err);
@@ -31,6 +33,10 @@ function Sales() {
 }
 
   useEffect(() => {
+    if(!contextData.loggedIn || !contextData.currentUser.admin)
+    {
+        navigate("/login");
+    }
     getSales();
   }, []);
 
@@ -83,7 +89,7 @@ function Sales() {
                                       <>
                                       <tr key={idx}>
                                           <td>{idx+1}</td>
-                                          <td>{order.user.username}</td>
+                                          <td>{order.user ? order.user.username : "[Deleted User]"}</td>
                                           <td>{formatDate(new Date(order.date))}</td>
                                           <td>₹ {order.total.total}/-</td>
                                           <td>
@@ -100,7 +106,7 @@ function Sales() {
                                                           
                                                       </div>
                                                       <div className="card-body">
-                                                        <h6>User: {order.user.username}</h6>
+                                                        <h6>User: {order.user ? order.user.username : "[Deleted User]"}</h6>
                                                         <h6>Phone: {order.phone}</h6>
                                                         <h6 className='m-0 p-0'>Address:</h6>
                                                         <div className='mb-1'>{order.address}</div>
@@ -123,10 +129,10 @@ function Sales() {
                                                                         return (
                                                                             <tr key={idx}>
                                                                                 <td>{idx+1}</td>
-                                                                                <td>{item.product.name}</td>
+                                                                                <td>{item.product? item.product.name : "[ Deleted Product ]"}</td>
                                                                                 <td>{item.quantity}</td>
-                                                                                <td>₹ {item.product.price}/-</td>
-                                                                                <td>₹ {item.product.price * item.quantity}/-</td>
+                                                                                {item.product? <td>₹ {item.product.price }/-</td> : <td>[ Deleted Product ]</td>}
+                                                                                {item.product? <td>₹ {item.product.price * item.quantity}/-</td>: <td>[ Deleted Product ]</td>}
                                                                             </tr>
                                                                         )
                                                                     })

@@ -1,5 +1,6 @@
 const User = require('../model/users.model');
 const bcrypt = require('bcrypt');
+var ObjectId = require('mongoose').Types.ObjectId;
 
 
 exports.getUsers = (req, res) => {
@@ -109,3 +110,14 @@ exports.deleteUser = (req, res) => {
         res.send('Error: ' + err);
     });
 }
+
+exports.removeProductFromCart = (req, res) => {
+    User.find({cart: {$elemMatch: {product: new ObjectId(req.params.productID)}}})
+        .then(users => {
+            users.forEach(user => {
+                user.cart.splice(user.cart.findIndex(item => item.product == req.params.productID), 1);
+                user.save();
+            });
+            res.send(users);
+           })
+    }

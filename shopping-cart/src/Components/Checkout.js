@@ -1,16 +1,20 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { LoginDetails } from '../App.js';
 import axios from 'axios';
 
 function Checkout() {
     const [address, setAddress] = useState("");
     const [phone, setPhone] = useState("");
+    const [alert, setAlert] = useState("");
     const navigate = useNavigate();
     const contextData = useContext(LoginDetails);
 
     useEffect(() => {
-        console.log(contextData, "contextData");
+        if(!contextData.loggedIn)
+        {
+            navigate("/login");
+        }
     }, []);
 
     var onPhoneChange = (event) => 
@@ -21,11 +25,38 @@ function Checkout() {
          }
     }
 
+    var placeOrder = (order) =>
+    {
+        axios.post('/orders/create', order)
+            .then(res => {
+            contextData.currentUser.cart.forEach(product => {
+                axios.put(`http://localhost:5000/products/${product.product._id}/update/stock`, {
+                    orderQuantity: product.quantity
+                })
+                .then(res => {
+                    console.log(res);
+                    
+                })
+                .catch(err => {
+                    console.log(err);
+                })
+            });
+            contextData.currentUser.cart = [];
+            contextData.setCurrentUser(contextData.currentUser);
+            contextData.updateCart([]);
+            contextData.setCart([]);
+            navigate('/checkout/confirmation');
+            })
+        .catch(err => {
+            console.log(err);
+        })
+    }
+
+
     var submitOrder = (event) => 
     {
         event.preventDefault();
             
-        contextData.checkout = { address, phone }
         var order = {
             user: contextData.currentUser._id,
             products: contextData.currentUser.cart,
@@ -33,20 +64,31 @@ function Checkout() {
             address: address,
             phone: phone,
         }
-        console.log(order, "this is order")
-        axios.post('/orders/create', order)
-        .then(res => {
-            console.log(res);
-            contextData.currentUser.cart = [];
-            contextData.setCurrentUser(contextData.currentUser);
-            contextData.updateCart([]);
-            contextData.setCart([]);
-            navigate('/checkout/confirmation');
-        })
-        .catch(err => {
-            console.log(err);
-        })
-        
+
+        var unavailableProducts = [];
+        order.products.forEach(product => {
+            axios.get(`http://localhost:5000/products/${product.product._id}`)
+            .then(res => {
+                if(Number(res.data.stock) < Number(product.quantity))
+                {
+                    unavailableProducts.push(res.data.name);
+                }
+                if(unavailableProducts.length > 0)
+                {
+                    var alertMessage = "Following products are unavailable:\n";
+                    unavailableProducts.forEach(product => {
+                        alertMessage += product + "\n";
+                    });
+
+                    setAlert(alertMessage);
+
+                }
+                else
+                {
+                    placeOrder(order);
+                }
+            })
+        });
     }
 
     return (
@@ -54,7 +96,14 @@ function Checkout() {
             <div className="border color-primary cart-top">
             <h3>Checkout</h3>
             </div>
+            
             <div className="border checkout-form">
+            {alert && <div className="alert alert-danger mb-3 mx-2">
+                <h4 class="alert-heading">Products unavailable</h4>
+
+                <p>{alert}</p>
+                <Link to="/cart"><button className="btn btn-primary">Back to cart</button></Link>
+            </div>}
                 <form onSubmit={submitOrder} >
                     <div className='input'>
                         <label htmlFor='address'>Address</label>

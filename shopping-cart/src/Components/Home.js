@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import ProductCard from './ProductCard';
 
@@ -10,6 +10,7 @@ export default function Home(props) {
   const [sort, setSort] = useState("Sort By");
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const [reRender, setReRender] = useState(false);
 
   useEffect(() => {
     axios.get('/products/')
@@ -17,7 +18,7 @@ export default function Home(props) {
         setProducts(res.data);
         setData(res.data);
         setCategories([ ...new Set(res.data.map((prods) => prods.category))]);
-        setLoading(false);
+        
       })
       .catch(err => {
         console.log(err);
@@ -31,8 +32,8 @@ export default function Home(props) {
 
 
   var filterCategory = (category) => {
-    console.log(category);
     setFilter(category);
+    setReRender(!reRender);
     if(category === "All")
     {
       setData(products);
@@ -46,6 +47,7 @@ export default function Home(props) {
 
   var sortProducts = (sort) => {
     setSort(sort);
+    setReRender(!reRender);
     if(sort ===  "Price: Low to High")
     {
       setData([ ...data ].sort((a, b) => (a.price > b.price) ? 1 : -1));
@@ -68,6 +70,7 @@ export default function Home(props) {
     setSearchQuery(search);
     setFilter("All");
     setSort("Sort By");
+    setReRender(!reRender);
     if(search === "")
     {
       setData([ ...products ]);
@@ -76,6 +79,7 @@ export default function Home(props) {
     {
       setData([ ...products ].filter((product) => product.name.toLowerCase().includes(search.toLowerCase())));
     }
+
   }
 
   return (
@@ -123,7 +127,7 @@ export default function Home(props) {
         <div className="row g-3">
           {data.length > 0 ? data.map((product, index) => {
               return (
-                <ProductCard product={product} index={index} />
+                <ProductCard product={product} index={index} reRender={reRender}/>
               )})
               :
               <div className="col-md-12 text-center p-5 text-secondary">

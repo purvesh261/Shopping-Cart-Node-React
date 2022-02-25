@@ -12,6 +12,13 @@ let MRInwardSchema = new Schema({
         rate: {type: Number, required: true},
         amount: {type: Number, required: true}
     }],
+    RemovedMRInwardItems: [{
+        product: {type: String},
+        quantity: {type: Number, required: true},
+        rate: {type: Number, required: true},
+        amount: {type: Number, required: true}
+    }],
+
     MRInwardTotal: {type: Number, required: true}
 });
 

@@ -1,10 +1,17 @@
 import React,  { useContext, useEffect, useState } from 'react';
 import { LoginDetails } from "../App";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 function Confirmation() {
     const contextData = useContext(LoginDetails);
+    const navigate = useNavigate();
 
+    useEffect(() => {
+        if(!contextData.loggedIn)
+        {
+            navigate("/login");
+        }
+    }, []);
     return (
     <div className='card w-50'>
         <div className='card-body'>

@@ -9,7 +9,7 @@ let productSchema = new Schema({
     stock: {type: Number, required: true, default: 0},
     category: {type: String, required: true},
     status: {type: Boolean, required: true, default: true},
-    images: [{type: String, maxlength: 300, required: false}],
+    images: {type: String, maxlength: 300, required: false},
     dateAdded: {type: Date, default: Date.now, required: true},
 });
 

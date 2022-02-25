@@ -1,8 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { LoginDetails } from '../App';
+import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
-import image from '../assets/img-prod.jpg';
-
 function Cart() {
   const contextData = useContext(LoginDetails);
   const { cart } = contextData;
@@ -15,9 +14,10 @@ function Cart() {
     for (let i = 0; i < cart.length; i++) {
       newAmount += cart[i].product.price * cart[i].quantity;
     }
-    var newTax = newAmount * 0.1;
-    var newShipping = (newAmount + newTax >= 1000? 0: 100);
-    var newTotal = newAmount + newTax + newShipping;
+    var newTax = Number(newAmount * 0.1).toFixed(2);
+    var newShipping = 150;
+    var newTotal = Number(newAmount) + Number(newTax) + Number(newShipping);
+    newTotal = Number(newTotal).toFixed(2);
     setTotal({amount:newAmount, tax:newTax, shipping:newShipping, total:newTotal});
   }
 
@@ -25,11 +25,9 @@ function Cart() {
     getTotal();
   }, []);
 
+
   var changeQuantity = (event, index) => {
-    console.log(index);
-    console.log(cart[index].quantity);
     cart[index].quantity = Number(event.target.value);
-    console.log(cart[index].quantity);
     contextData.setCart(cart);
     if(contextData.loggedIn)
     {
@@ -54,7 +52,6 @@ function Cart() {
   
   var checkOut = () =>
   {
-    console.log(contextData.currentUser);
     contextData.total = total;
     contextData.loggedIn ? navigate('/checkout') : navigate('/login');
   }
@@ -68,20 +65,19 @@ function Cart() {
     {cart.map((item, index) => {
         return(
         <div key={index} className="border cart-item">
-            <div className="cart-item-image">
-                <img src={image} alt="item image"/>
-            </div>
             <div className="cart-item-details">
                 <h4 className='text-color-primary'>{item.product.name}</h4>
                 <h5>Price: ₹ {item.product.price}</h5>
                   <form className='form-inline'>
-                    <label for='quantity'><h5>Quantity:</h5></label>
+                    <label htmlFor='quantity'><h5>Quantity:</h5></label>
                     <select className='form-control cart-quantity' name='quantity' value={item.quantity} onChange={(e) => changeQuantity(e, index)}>
-                        <option>1</option>
-                        <option>2</option>
-                        <option>3</option>
-                        <option>4</option>
-                        <option>5</option>
+                    { [1,2,3,4,5,6,7,8,9,10].map(i =>{
+                        if (i > item.product.stock){
+                            return null;
+                        }
+                        return <option key={i} value={i}>{i}</option>
+                        })
+                    }
                     </select>
 
                   </form>

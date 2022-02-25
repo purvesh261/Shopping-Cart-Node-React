@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { LoginDetails } from '../../App.js';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 
 function AddProduct() {
@@ -11,9 +13,14 @@ function AddProduct() {
         images: [],
     });
     const [alert, setAlert] = useState("");
+    const contextData = useContext(LoginDetails);
+    const navigate = useNavigate();
 
     useEffect(() => {
-        console.log(product);
+        if(!contextData.loggedIn || !contextData.currentUser.admin)
+        {
+            navigate("/login");
+        }
     }, [product.images]);
 
     var validateFileExtension = (file) => {
@@ -26,64 +33,53 @@ function AddProduct() {
         let {name, value} = event.target;
         if(name === "images")
         {
-            if(!value)
+            const file = event.target.files[0];
+
+            if(file === undefined) {
+            } 
+            else if(file.type === "image/png" || file.type === "image/jpeg")
             {
-                setProduct({...product, images: [value]});
+                setProduct({...product, [name]: file});
             }
-            else if(validateFileExtension(value))
-            {
-                setProduct({...product, [name]: value});
-            }
-            else
-            {
+            else {
                 setAlert("Please upload a valid image file");
-                setTimeout(() => setAlert(""), 2000);
+                setTimeout(() => {
+                    setAlert("");
+                }, 3000);
             }
         }
         else
         {
             setProduct({...product, [name]: value});
+
         }
     }
 
     var onSubmitHandler = (event) => {
         event.preventDefault();
-        console.log(product);
-        var skipValidations = false;
-        if(product.images == [] || product.images == null)
-        {
-            skipValidations = true;
-        }
-
-        if(!skipValidations && !validateFileExtension(product.images[0]))
-        {
-            setAlert("Please upload a valid image file");
-            setTimeout(() => setAlert(""), 2000);
-            return;
-        }
-        else
-        {
-            var formData = new FormData();
-            formData.append('name', product.name);
-            formData.append('price', product.price);
-            formData.append('category', product.category);
-            formData.append('description', product.description);
-            formData.append('images', product.images[0]);
-
-            axios.post('/products/create', formData)
-                .then(res => {
-                    console.log(res);
-                })
-                .catch(err => {
-                    console.log(err);
-                });
-        }
+        var formData = new FormData();
+        formData.append('name', product.name);
+        formData.append('price', product.price);
+        formData.append('category', product.category);
+        formData.append('description', product.description);
+        formData.append('images', product.images);
+        axios.post('/products/create', formData)
+            .then(res => {
+                console.log(res);
+            })
+            .catch(err => {
+                console.log(err);
+            });
+        navigate('/admin/products');
     }
 
     return (
     <div className='product-form border' >
         <div className='head'>
             <h3>Add Product</h3>
+            {alert && <div className="alert alert-danger" role="alert">
+              {alert}
+            </div>}
         </div>
         {alert && <div className="alert alert-danger" role="alert">
               {alert}
@@ -98,16 +94,6 @@ function AddProduct() {
                 <label>Price</label>
                 <input type="number" className='form-control' min="1" name="price" value={product.price} onChange={onChangeHandler} placeholder='Enter price' required></input>
             </div>
-
-            {/* <div className='form-group mb-3'>
-                    <label>Quantity</label>
-                    <input type="number" className='form-control' min="1" name="quantity" placeholder='Enter quantity'></input>
-            </div> */}
-
-            {/* <div className='form-group mb-3'>
-                    <label>Supplier</label>
-                    <input type="number" className='form-control' name="supplier" placeholder='Enter supplier'></input>
-            </div> */}
 
             <div className='form-group mb-3'>
                     <label>Category</label>

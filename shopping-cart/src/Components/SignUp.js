@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../App.css';
 import { LoginDetails } from '../App.js';
@@ -20,6 +20,20 @@ function Signup() {
   const validPassword = new RegExp('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$');
   const validEmail = new RegExp('^[a-z0-9]+[\\._]?[a-z0-9]+[@]\\w+[.]\\w{2,3}$');
 
+  useEffect(() => {
+    if(contextData.loggedIn)
+      {
+        if(contextData.currentUser.admin)
+        {
+          navigate("/admin/users");
+        }
+        else
+        {
+          navigate("/");
+        } 
+      }
+  },[]);
+
   var userExists = () => {
     if(!username)
     {
@@ -27,7 +41,6 @@ function Signup() {
     }
     axios.get(`/users/username/${username}`)
       .then(res => {
-        console.log(res.data)
         if (res.data.length > 0) {
           setAlert("Username already exists");
           setTimeout(() => setAlert(""), 2000)
@@ -45,7 +58,6 @@ function Signup() {
   var onSubmit = (event) => 
   {
     event.preventDefault();
-    console.log(event.target);
     if (!(username && email && password && confirmPassword && checked))
     {
       setAlert("Enter all the fields");

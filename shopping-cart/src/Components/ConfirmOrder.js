@@ -1,9 +1,17 @@
-import React, { useContext} from 'react';
+import React, { useContext, useEffect } from 'react';
 import { LoginDetails } from '../App';
-import { useLocation } from 'react-router-dom';
 
 function ConfirmOrder() {
     const contextData = useContext(LoginDetails);
+    const navigate = useNavigate();
+    const contextData = useContext(LoginDetails);
+
+    useEffect(() => {
+        if (!contextData.loggedIn)
+        {
+            navigate("/login");
+        }
+    }, []);
     return (
         <>
             <div>ConfirmOrder</div>

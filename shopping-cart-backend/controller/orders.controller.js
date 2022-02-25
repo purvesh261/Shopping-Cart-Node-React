@@ -29,7 +29,6 @@ exports.getOrderByUser = (req, res) => {
     Order.find({user: req.params.userid})
         .populate('products.product')
         .then(ordersList => {
-            console.log(ordersList);
             res.send(ordersList)
         })
         .catch( err => {
@@ -41,16 +40,7 @@ exports.createOrder = (req, res) => {
     let order = new Order(req.body);
     order.save()
         .then(order => {
-            order.products.forEach(item => {
-                Product.findByIdAndUpdate(item.product._id, {$inc: {stock: -item.quantity}})
-                        .then(product => {
-                            console.log(product);
-                        })
-                        .catch(err => {
-                            console.log(err);
-                        })
-                res.send(order);
-            })
+            res.send(order);
         })
         .catch( err => {
             res.send('Error: ' + err)

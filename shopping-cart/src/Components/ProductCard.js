@@ -8,32 +8,31 @@ function ProductCard(props) {
     const [quantity, setQuantity] = useState(1);
     const [productImage, setProductImage] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [state, setState] = useState({});
-
-    let { product } = props;
-
-    useEffect(() => {
-        if(product.images.length > 0)
+    const { product } = props;
+    
+    const getProductImage = (product) => {
+        var image = null;
+        if("images" in product && product.images !== null)
         {
-            axios.get('/static/products/' + product._id + '/' + product.images[0], {responseType: 'blob', headers: {'Content-Type': 'image/jpeg'}})
+            axios.get(`/static/products/${product._id}/${product.images}`, {responseType: 'blob', headers: {'Content-Type': 'image/jpeg'}})
             .then(res => {
-                console.log(res.data);
                 setProductImage(URL.createObjectURL(res.data));
                 setLoading(false);
-            })
+                })
             .catch(err => {
                 console.log(err);
-            });
+        });
         }
-        else    
+        else
         {
             setProductImage(defaultImage);
             setLoading(false);
-            return () => {
-                setState({}); 
-              };
         }
-    }, []);
+      }
+
+    useEffect(() => {
+        getProductImage(product);
+    }, [props.reRender]);
 
     var addToCart = (event) =>
     {
@@ -70,7 +69,7 @@ function ProductCard(props) {
         <div className='col-12 col-md-6 col-lg-4'>
             <div className="card">
 
-                { !loading && <img className="card-img-top" src={productImage != null ? productImage: defaultImage} alt="Card image cap" /> }
+                { !loading ? <img className="card-img-top" src={productImage} alt="Card image cap" /> : <span>loading...</span> }
                 <div className="card-body">
                     <h5 className="card-title">{product.name}</h5>
                     <p className="card-text text-secondary">{product.description ? product.description : product.category}</p>
@@ -80,11 +79,13 @@ function ProductCard(props) {
                         <div className="input-group">
                             <div className="form-outline">
                                 <select className='form-control' name='quantity' value={quantity} onChange={(e) => setQuantity(e.target.value)}>
-                                    <option>1</option>
-                                    <option>2</option>
-                                    <option>3</option>
-                                    <option>4</option>
-                                    <option>5</option>
+                                    { [1,2,3,4,5,6,7,8,9,10].map(i =>{
+                                        if (i > product.stock){
+                                            return null;
+                                        }
+                                        return <option key={i} value={i}>{i}</option>
+                                    })
+                                    }
                                 </select>
                             </div>
                             <button type='submit' className={product.stock > 0 ? "rounded submit px-3 color-primary login-btn" : "rounded submit px-3 btn btn-secondary"} disabled={product.stock <= 0}>Add to Cart</button>

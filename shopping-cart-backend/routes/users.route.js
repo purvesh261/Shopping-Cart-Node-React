@@ -9,5 +9,6 @@ router.post('/', controller.createUser);
 router.put('/:id/update', controller.updateUser);
 router.put('/:id/update/cart', controller.updateCart);
 router.delete('/:id/delete', controller.deleteUser);
+router.put('/:productID/cart/remove', controller.removeProductFromCart);
 
 module.exports = router;

@@ -22,6 +22,8 @@ import NewMR from './Components/Admin/NewMR';
 
 export const LoginDetails = createContext({});
 
+
+
 function App() {
   const [loggedIn, setLogin] = useState(false); 
   const [currentUser, setCurrentUser] = useState("");
@@ -32,7 +34,6 @@ function App() {
     {
       axios.put(`/users/${currentUser._id}/update/cart`, {cart: login.cart})
           .then((res) => {
-            console.log(res);
             login.currentUser.cart = login.cart;
             login.setCurrentUser(login.currentUser);
             setCart(login.cart);
@@ -43,6 +44,8 @@ function App() {
     }
   }
 
+
+
   const userObject = {
     loggedIn: loggedIn,
     setLogin: setLogin,
@@ -50,7 +53,7 @@ function App() {
     setCurrentUser: setCurrentUser,
     cart: cart,
     setCart: setCart,
-    updateCart: updateCart
+    updateCart: updateCart,
   }
 
   return (
@@ -73,6 +76,7 @@ function App() {
           <Route path="/admin/sales" element={<Sales />}/>
           <Route path="/admin/mrinward" element={<MRInward />}/>
           <Route path="/admin/mrinward/new" element={<NewMR />}/>
+          <Route path="/admin/mrinward/:mrid/edit" element={<NewMR />}/>
           <Route path="*" element={<h3>404 - Page not found</h3>}/>
         </Routes>
       </div>
