@@ -14,7 +14,7 @@ function Signup() {
   const [checked, setChecked] = useState(false);
   const [passwordValidation, setPasswordValidation] = useState();
   const [alert, setAlert] = useState()
-  const loginSettings = useContext(LoginDetails);
+  const contextData = useContext(LoginDetails);
   const navigate = useNavigate();
   const validUsername = new RegExp('^[a-zA-Z0-9]{5,}$');
   const validPassword = new RegExp('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$');
@@ -87,12 +87,11 @@ function Signup() {
 
       axios.post("/users/", newUser )
       .then(res => {
-        loginSettings.currentUser = newUser;
-        loginSettings.loggedIn = true;
-        loginSettings.cart = []
-        loginSettings.setLogin(true);
-        loginSettings.setCurrentUser(newUser);
-        loginSettings.setCart([]);
+        contextData.loggedIn = true;
+        contextData.cart = []
+        contextData.setLogin(true);
+        contextData.setCurrentUser(res.data);
+        contextData.setCart([]);
         navigate("/");
       })
     }

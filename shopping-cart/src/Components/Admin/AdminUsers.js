@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import CreateUser from './CreateUser';
+import { LoginDetails } from '../../App';
+import { useNavigate } from 'react-router-dom';
 import '../../App.css'
 import axios from 'axios';
 
@@ -10,7 +12,16 @@ function AdminUsers() {
     const [editForm, setEditForm] = useState({username:"", email:"", admin:false, status:false});
     const [alert, setAlert] = useState("");
     const [userAdded, setUserAdded] = useState(false);
+    const navigate = useNavigate();
     var [deleteIndex, setDeleteIndex] = useState();
+    const contextData = useContext(LoginDetails);
+
+    useEffect(() => {
+        if(!contextData.loggedIn || !contextData.currentUser.admin)
+        {
+            navigate("/");
+        }
+    },[]);
 
     var getUsers = () => {
         axios.get('/users/')
@@ -94,7 +105,7 @@ function AdminUsers() {
                 
                     <div className="table-responsive">
                     {alert && <div className="alert alert-success m-3">{alert}</div>}
-                    {deleteIndex &&
+                    {deleteIndex != null &&
                         <div className="alert alert-danger m-3" role="alert">
                             <h5 className="alert-heading">Delete User</h5>
                             Are you sure you want to delete this user?<br/>

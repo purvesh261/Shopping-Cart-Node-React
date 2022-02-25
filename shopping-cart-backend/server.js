@@ -2,6 +2,7 @@ const config = require('./config.js');
 const express = require('express');
 const bodyParser = require('body-parser');
 var cors = require('cors')
+const fileUpload = require('express-fileupload');
 const mongoose = require('mongoose');
 const products  = require('./routes/products.route');
 const users = require('./routes/users.route');
@@ -12,11 +13,13 @@ const app = express();
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cors());
+app.use('/static', express.static('public'))
+app.use(fileUpload());
 app.use('/users', users);
 app.use('/products', products);
 app.use('/orders', orders);
 app.use('/mrinwards', mrinwards);
-app.use(cors());
 app.all('*', function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "X-Requested-With");

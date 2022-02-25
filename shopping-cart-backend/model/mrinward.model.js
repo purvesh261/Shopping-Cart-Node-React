@@ -7,7 +7,7 @@ let MRInwardSchema = new Schema({
     MRInwardDate: {type: Date, default: Date.now},
     Supplier: {type: String, required: true},
     MRInwardItems: [{
-        product: {type: String, required: true},
+        product: {type: Schema.Types.ObjectId, ref: 'Product'},
         quantity: {type: Number, required: true},
         rate: {type: Number, required: true},
         amount: {type: Number, required: true}

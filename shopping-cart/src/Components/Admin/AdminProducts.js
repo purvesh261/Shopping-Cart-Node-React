@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import '../../App.css'
+import { Link } from 'react-router-dom';
+import '../../App.css';
 import axios from 'axios';
 
 function AdminProducts() {
@@ -47,7 +48,7 @@ function AdminProducts() {
 
     var onSave = (event) => {
         event.preventDefault();
-        axios.put(`/product/${products[editIndex]._id}/update`, editForm)
+        axios.put(`/products/${products[editIndex]._id}/update`, editForm)
             .then(res => {
                 setProducts(products.map((product, i) => {
                     if(i === editIndex)
@@ -67,7 +68,7 @@ function AdminProducts() {
 
     var onDeleteYes = () => 
     {
-        axios.delete(`/product/${products[deleteIndex]._id}/delete`)
+        axios.delete(`/products/${products[deleteIndex]._id}/delete`)
             .then(res => {
                 setLoading(true)
                 getProducts()
@@ -78,10 +79,19 @@ function AdminProducts() {
             })
     }
 
-    var onDeleteNo = () => 
+    var onDeleteNo = () =>
     {
         setDeleteIndex(null);
     }
+
+    function formatDate(date) {
+        const orderMonth = date.getMonth() + 1;
+        const monthString = orderMonth >= 10 ? orderMonth : `0${orderMonth}`;
+        const orderDate = date.getDate();
+        const dateString = orderDate >= 10 ? orderDate : `0${orderDate}`;
+        return `${dateString}/${monthString}/${date.getFullYear()}`;
+    }
+
 
     return (
         <>
@@ -90,12 +100,12 @@ function AdminProducts() {
                 <div className='col-12'>
                     <div className='head'>
                         <h2>Products</h2>
-                        <button className='btn btn-primary btn-create'>Add Product</button>
+                        <Link to="/admin/products/new"><button className='btn btn-primary btn-create'>Add Product</button></Link>
                     </div>
                 
                     <div className="table-responsive">
                     {alert && <div className="alert alert-success m-3">{alert}</div>}
-                    {deleteIndex &&
+                    {deleteIndex != null &&
                         <div className="alert alert-danger m-3" role="alert">
                             <h5 className="alert-heading">Delete Product</h5>
                             Are you sure you want to delete this product?<br/>
@@ -124,10 +134,10 @@ function AdminProducts() {
                                     <tr key={idx}>
                                         <td>{idx+1}</td>
                                         <td>{product.name}</td>
-                                        <td>{product.price}</td>
+                                        <td>₹ {product.price}/-</td>
                                         <td><input type="checkbox" checked={product.status} /></td>
                                         <td>
-                                            <button className='btn btn-primary btn-margin' onClick={() => console.log("ok")}>View Details</button>
+                                            <button className='btn btn-primary btn-margin' onClick={() => editIndex === idx? setEditIndex(null) : setEditIndex(idx)}>View Details</button>
                                         </td>
                                         <td>
                                             <button className='btn btn-danger btn-margin' onClick={() => setDeleteIndex(idx)}>Delete</button>
@@ -135,26 +145,23 @@ function AdminProducts() {
                                     </tr>
                                     { editIndex === idx?
                                         <tr key="-1">
-                                            <td colSpan="6" className='p-3'>
-                                                <form onSubmit={onSave}>
-                                                    <div className="form-group mb-2">
-                                                        <label>Username</label>
-                                                        <input type="text" className="form-control w-25" value={editForm.username} onChange={onChangeHandler} name="username" placeholder="Username" />
+                                            <td colSpan="6" className='bg-secondary'>
+                                                  <div className="card">
+                                                      <div className="card-header">   
+                                                          <h5>Product</h5>
+                                                          
+                                                      </div>
+                                                      <div className="card-body">
+                                                        <h6>Product: {product.name}</h6>
+                                                        <h6>Price: ₹ {product.price}/-</h6>
+                                                        <h6>Quantity: {product.stock}</h6>
+                                                        <h6>Description: {product.description}</h6>
+                                                        <h6>Category: {product.category}</h6>
+                                                        <h6>Status: {product.status ? "Active" : "Disabled"}</h6>
+                                                        <h6>Created On: {formatDate(new Date(product.dateAdded))}</h6>
                                                     </div>
-                                                    <div className="form-group mb-2">
-                                                        <label>Email</label>
-                                                        <input type="email" className="form-control w-25" value={editForm.email} onChange={onChangeHandler} name="email" placeholder="Email" />
                                                     </div>
-                                                    <div className="form-group mb-2">
-                                                        <label>Admin: </label>
-                                                        <input type="checkbox" checked={editForm.admin} onChange={onChangeHandler} name="admin" />
-                                                    </div>
-                                                    <div className="form-group mb-2">
-                                                        <label>Status:</label>
-                                                        <input type="checkbox" checked={editForm.status} onChange={onChangeHandler} name="status" />
-                                                    </div>
-                                                    <input type="submit" className="btn btn-primary px-4" value="Save"/>
-                                                </form>
+                                                
                                             </td>
                                         </tr>
                                     : null}

@@ -36,6 +36,12 @@
     border: 1px solid rgb(187, 187, 187);
     border-radius: 5px;
   }
+  
+  .card-img-top {
+    width: 100%;
+    height: 15vw;
+    object-fit: cover;
+  }
 }
 
 @media only screen and (max-width: 992px) {
@@ -209,5 +215,30 @@ input[type="checkbox"]{
   min-width: 200px;
 }
 
+.checkout-form {
+  width: 90%;
+  padding: 30px 0 30px 0;
+  margin: auto;
+}
 
+.checkout-form .input {
+  padding: 0 0 10px 30px;
+}
 
+textarea {
+  resize: none;
+}
+
+.product-form {
+  margin: auto;  
+  margin-top: 80px;
+  padding: 20px 80px 50px 80px;
+  width: 35%;
+  align-items: center;
+  border-radius: 5px;
+}
+
+.order-item {
+  width: 90%;
+  margin: auto;
+}

@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../App.css';
 import axios from 'axios';
@@ -10,7 +10,24 @@ function Login() {
   const [password, setPassword] = useState("");
   const [alert, setAlert] = useState()
   const navigate = useNavigate();
-  const loginSettings = useContext(LoginDetails);
+  const contextData = useContext(LoginDetails);
+
+  useEffect(() => {
+      if(contextData.loggedIn)
+      {
+          navigate("/");
+      }
+  },[]);
+  
+  useEffect(() => {
+    if (contextData.loggedIn === true)
+    {
+      console.log(contextData.currentUser.cart, contextData.cart, contextData.currentUser.cart.length);
+      mergeCarts(contextData.currentUser.cart, contextData.cart);
+      contextData.currentUser.admin? navigate("/admin/users"): navigate("/");
+    }
+  
+  }, [contextData.currentUser]);
 
   var mergeCarts = (userCart, guestCart) =>
   {
@@ -24,10 +41,10 @@ function Login() {
       }
     }
     newCart = [...userCart, ...guestCart];
-    loginSettings.setCart(newCart);
-    loginSettings.currentUser.cart = newCart;
-    loginSettings.setCurrentUser(loginSettings.currentUser);
-    loginSettings.updateCart(newCart);
+    contextData.setCart(newCart);
+    contextData.currentUser.cart = newCart;
+    contextData.setCurrentUser(contextData.currentUser);
+    contextData.updateCart(newCart);
   }
 
   var onLogin = (event) => 
@@ -38,32 +55,25 @@ function Login() {
       setAlert("Enter username and password");
       setTimeout(() => setAlert(""),2000)
     }
-    else{
-      axios.get(`/users/username/${username}`).then((res) => {
-        if(res.data.length > 0)
+    else
+    {
+      axios.post('/users/authenticate', { username, password }).then((res) => {
+        console.log(res, "res");
+        if (!res.data.error)
         {
-          if(res.data[0].password === password)
-          {
-            loginSettings.loggedIn = true;
-            loginSettings.currentUser = res.data[0];
-            loginSettings.setLogin(true);
-            mergeCarts(res.data[0].cart, loginSettings.cart);
-            res.data[0].admin? navigate("/admin/users"): navigate("/");
-          }
-          else
-          {
-            setAlert("Incorrect password");
-            setTimeout(() => setAlert(""),2000)
-          }
+          contextData.setLogin(true);
+          
+          contextData.setCurrentUser(res.data);
+          
         }
         else
         {
-          setAlert("User does not exist");
+          setAlert(res.data.error);
           setTimeout(() => setAlert(""),2000)
         }
     });
-    
   }}
+
   return (
     <div className="container mt-5">
 				<div className="col-md-6 col-lg-5 justify-content-center user-form">
@@ -74,10 +84,10 @@ function Login() {
             </div>}
 						<form onSubmit={onLogin}>
 		      		<div className="form-group">
-		      			<input type="text" className="form-control rounded-left mb-3 p-2" placeholder="Username" value={username} onChange={e => setUsername(e.target.value)}></input>
+		      			<input type="text" className="form-control rounded-left mb-3 p-2" placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} required></input>
 		      		</div>
 	            <div className="form-group">
-	              <input type="password" className="form-control rounded-left mb-3 p-2" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)}></input>
+	              <input type="password" className="form-control rounded-left mb-3 p-2" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required></input>
 	            </div>
 	            <div className="form-group mt-3">
 	            	<button type="submit" className="rounded submit p-2 px-4 w-100 color-primary">Login</button>

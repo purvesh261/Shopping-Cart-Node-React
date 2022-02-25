@@ -1,52 +1,81 @@
+import axios from 'axios';
 import React, { useContext, useState, useEffect } from 'react';
 import { LoginDetails } from '../App';
-import image from '../assets/img-prod.jpg';
+import defaultImage from '../assets/img-prod.jpg';
 
 function ProductCard(props) {
-    const loginSettings  = useContext(LoginDetails);
+    const contextData  = useContext(LoginDetails);
     const [quantity, setQuantity] = useState(1);
+    const [productImage, setProductImage] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [state, setState] = useState({});
+
     let { product } = props;
 
+    useEffect(() => {
+        if(product.images.length > 0)
+        {
+            axios.get('/static/products/' + product._id + '/' + product.images[0], {responseType: 'blob', headers: {'Content-Type': 'image/jpeg'}})
+            .then(res => {
+                console.log(res.data);
+                setProductImage(URL.createObjectURL(res.data));
+                setLoading(false);
+            })
+            .catch(err => {
+                console.log(err);
+            });
+        }
+        else    
+        {
+            setProductImage(defaultImage);
+            setLoading(false);
+            return () => {
+                setState({}); 
+              };
+        }
+    }, []);
 
     var addToCart = (event) =>
     {
         event.preventDefault();
         let found = false;
-        for(let i = 0; i < loginSettings.cart.length; i++)
+        for(let i = 0; i < contextData.cart.length; i++)
         {
-            if(loginSettings.cart[i].product._id === product._id)
+            if(contextData.cart[i].product._id === product._id)
             {
-                loginSettings.cart[i].quantity = Number(quantity);
+                contextData.cart[i].quantity = Number(quantity);
                 found = true;
                 break;
             }
         }
+
         if(!found)
         {
-            loginSettings.cart.push({product: product, quantity: Number(quantity)});
+            contextData.cart.push({product: product, quantity: Number(quantity)});
         }
         
-        if(loginSettings.loggedIn)
+        if(contextData.loggedIn)
         {
-            loginSettings.currentUser.cart = loginSettings.cart;
-            loginSettings.setCurrentUser(loginSettings.currentUser);
-            loginSettings.updateCart(loginSettings);
+            contextData.currentUser.cart = contextData.cart;
+            contextData.setCurrentUser(contextData.currentUser);
+            contextData.updateCart(contextData);
         }
-        console.log(loginSettings.cart);
-        console.log(loginSettings.currentUser);
 
-        loginSettings.setCart(loginSettings.cart);
+        contextData.setCart(contextData.cart);
         
     }
+
     return (
         <>
         <div className='col-12 col-md-6 col-lg-4'>
             <div className="card">
-                <img src={image} alt="Product image" className="card-img-top"/>
+
+                { !loading && <img className="card-img-top" src={productImage != null ? productImage: defaultImage} alt="Card image cap" /> }
                 <div className="card-body">
                     <h5 className="card-title">{product.name}</h5>
-                    <p className="card-text text-secondary">{product.description}</p>
-                    <h5 className="card-text">Price: {product.price}</h5>
+                    <p className="card-text text-secondary">{product.description ? product.description : product.category}</p>
+                    <h5 className="card-text">Price: ₹ {product.price}/-</h5>
+                    {product.stock > 0? <h6 className='card-text'>{product.stock} left</h6> : <h6 className='card-text text-danger'>Out of stock</h6>}
                     <form onSubmit={addToCart}>
                         <div className="input-group">
                             <div className="form-outline">
@@ -58,7 +87,8 @@ function ProductCard(props) {
                                     <option>5</option>
                                 </select>
                             </div>
-                            <button type='submit' className="rounded submit px-3 color-primary login-btn">Add to cart</button>
+                            <button type='submit' className={product.stock > 0 ? "rounded submit px-3 color-primary login-btn" : "rounded submit px-3 btn btn-secondary"} disabled={product.stock <= 0}>Add to Cart</button>
+                            
                         </div>
                     </form>
                 </div>

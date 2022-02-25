@@ -4,8 +4,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import image from '../assets/img-prod.jpg';
 
 function Cart() {
-  const loginSettings = useContext(LoginDetails);
-  const { cart } = loginSettings;
+  const contextData = useContext(LoginDetails);
+  const { cart } = contextData;
   const [total, setTotal] = useState({amount:0 ,tax:0, shipping:0, total:0});
   const navigate = useNavigate();
 
@@ -22,7 +22,6 @@ function Cart() {
   }
 
   useEffect(() => {
-    console.log(cart, "this is the cart");
     getTotal();
   }, []);
 
@@ -31,32 +30,33 @@ function Cart() {
     console.log(cart[index].quantity);
     cart[index].quantity = Number(event.target.value);
     console.log(cart[index].quantity);
-    loginSettings.setCart(cart);
-    if(loginSettings.loggedIn)
+    contextData.setCart(cart);
+    if(contextData.loggedIn)
     {
-        loginSettings.currentUser.cart = cart;
-        loginSettings.setCurrentUser(loginSettings.currentUser);
-        loginSettings.updateCart(loginSettings)
+        contextData.currentUser.cart = cart;
+        contextData.setCurrentUser(contextData.currentUser);
+        contextData.updateCart(contextData)
     }
     getTotal();
   };
 
   var removeItem = (index) => {
     cart.splice(index, 1);
-    loginSettings.setCart(cart);
-    if(loginSettings.loggedIn)
+    contextData.setCart(cart);
+    if(contextData.loggedIn)
     {
-        loginSettings.currentUser.cart = cart;
-        loginSettings.setCurrentUser(loginSettings.currentUser);
-        loginSettings.updateCart(loginSettings)
+        contextData.currentUser.cart = cart;
+        contextData.setCurrentUser(contextData.currentUser);
+        contextData.updateCart(contextData)
     }
     getTotal();
   };
   
   var checkOut = () =>
   {
-    console.log(loginSettings.currentUser);
-    loginSettings.loggedIn ? navigate('/checkout') : navigate('/login');
+    console.log(contextData.currentUser);
+    contextData.total = total;
+    contextData.loggedIn ? navigate('/checkout') : navigate('/login');
   }
   return (
     <>
@@ -109,7 +109,7 @@ function Cart() {
             <h4 className='text-warning'>₹ {total.total}</h4>
           </div>
         </div>
-        <button className="btn btn-warning offset-8" onClick={checkOut}>{loginSettings.loggedIn? "Proceed to Checkout": "Login and Checkout"}</button>
+        <button className="btn btn-warning offset-8" onClick={checkOut}>{contextData.loggedIn? "Proceed to Checkout": "Login and Checkout"}</button>
       </div>
       :
       <div className="border text-center cart-total">

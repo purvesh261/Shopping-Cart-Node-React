@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../../App.css';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 function NewMR() {
@@ -12,20 +13,32 @@ function NewMR() {
     });
 
     const [MRPost, setMRPost] = useState({});
-
     const [products, setProducts] = useState([{product:'', quantity:'', rate:'', amount:''}]);
+    const [loading, setLoading] = useState(true);
+    const [productsDropdown, setProductsDropdown] = useState([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
-        console.log(MRPost);
-        axios.post('/mrinwards/create/', MRPost)
-            .then(res => {
-                console.log(res, "response");
-            })
-            .catch(err => {
-                console.log(err);
-            }
-        );
+        if( Object.keys(MRPost).length > 0)
+        {
+            axios.post('/mrinwards/create/', MRPost)
+                .then(res => {
+                    console.log(res);
+                    navigate('/admin/mrinward');
+                })
+                .catch(err => {
+                    console.log(err);
+                });
+        }
     }, [MRPost]);
+
+    useEffect(() => {
+        axios.get('/products/names')
+            .then(res => {
+                setProductsDropdown(res.data);
+                setLoading(false);
+            })
+    }, [])
 
     var onChange = (event) =>
     {
@@ -39,10 +52,11 @@ function NewMR() {
         var { name, value } = event.target;
         var newProducts = [...products];
         newProducts[index][name] = value;
+        
         if (name === 'quantity' || name === 'rate')
         {
             newProducts[index].amount = newProducts[index].quantity * newProducts[index].rate;
-        }
+        } 
         setProducts(newProducts);
         calculateTotal();
     }
@@ -53,7 +67,6 @@ function NewMR() {
         products.forEach(product => {
             total += Number(product.amount);
         });
-        console.log(total, "total");
         setMRInward({...MRInward, mr_total: total});
     }
 
@@ -65,13 +78,13 @@ function NewMR() {
     }
     
     var removeRow = (index) => {
+        console.log(index);
         products.splice(index, 1);
         setProducts([...products]); 
     }
 
     var onSubmitForm = (event) => {
         event.preventDefault();
-        
         setMRPost(
             {
                 MRInwardNo: MRInward.mr_no,
@@ -85,7 +98,7 @@ function NewMR() {
   return (
     <div className='mr-form'>
         <h3 className='text-center pt-5 px-5'>Material Receipt (Inward)</h3>
-            <form onSubmit={onSubmitForm}>
+            <form onSubmit={(e) => onSubmitForm(e)}>
                 <div className='form-content'>
                     <div className=''>
                             <label htmlFor='mr-no'>MR No.</label>
@@ -118,7 +131,17 @@ function NewMR() {
                                     return (
                                         <tr key={idx}>
                                             <td>
-                                                <input type='text' className='form-control' name='product' value={item.product} onChange={(e) => onProductChange(e,idx)} placeholder='Enter Product' required/>
+                                                {/* <input type='text' className='form-control' name='product' value={item.product} onChange={(e) => onProductChange(e,idx)} placeholder='Enter Product' required/> */}
+                                                <select name="product" value={item.product} className="form-control" onChange={(e) => onProductChange(e, idx)}>
+                                                    <option value={""} key={idx}>Select Product</option>
+                                                    {
+                                                        !loading && productsDropdown.map((item, idx) => 
+                                                        {
+                                                            return <option value={item._id} key={idx}>{item.name}</option>
+                                                        })
+
+                                                    }
+                                                </select>
                                             </td>
                                             <td>
                                                 <input type='number' className='form-control' name='quantity' min="0" value={item.quantity} onChange={(e) => onProductChange(e,idx)} placeholder='Enter Quantity' required/>
@@ -133,7 +156,7 @@ function NewMR() {
                                                 <button className='btn btn-primary' onClick={(e) => newRow(e)}>+</button>
                                             </td>
                                             <td>
-                                                <button className='btn btn-danger' onClick={(e) => removeRow(e, idx)} disabled={idx === 0}>-</button>
+                                                <button className='btn btn-danger' onClick={() => removeRow(idx)} disabled={idx === 0}>-</button>
                                             </td>
                                         </tr>
                                     )
