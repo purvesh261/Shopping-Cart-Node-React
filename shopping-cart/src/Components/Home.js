@@ -127,7 +127,7 @@ export default function Home(props) {
         <div className="row g-3">
           {data.length > 0 ? data.map((product, index) => {
               return (
-                <ProductCard product={product} index={index} reRender={reRender}/>
+                <ProductCard product={product} index={index} key={index} reRender={reRender}/>
               )})
               :
               <div className="col-md-12 text-center p-5 text-secondary">

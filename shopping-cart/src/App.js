@@ -11,7 +11,6 @@ import Confirmation from './Components/Confirmation';
 import MyAccount from './Components/MyAccount';
 import Login from './Components/Login';
 import SignUp from './Components/SignUp';
-import Admin from './Components/Admin';
 import AdminUsers from './Components/Admin/AdminUsers';
 import AdminProducts from './Components/Admin/AdminProducts';
 import AddProduct from './Components/Admin/AddProduct';
@@ -69,7 +68,6 @@ function App() {
           <Route path="/login" element={<Login/>}/>
           <Route path="/sign-up" element={<SignUp/>}/>
           <Route path="/account" element={<MyAccount />}/>
-          <Route path="/admin" element={<Admin />}/>
           <Route path="/admin/users" element={<AdminUsers />}/>
           <Route path="/admin/products" element={<AdminProducts />}/>
           <Route path="/admin/products/new" element={<AddProduct />}/>

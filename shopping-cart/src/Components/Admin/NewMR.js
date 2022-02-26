@@ -123,8 +123,27 @@ function NewMR() {
     {
         var newMRInward = {...MRInward};
         var { name, value } = event.target;
-        newMRInward[name] = value;
-        setMRInward(newMRInward);
+        if( name === "mr_date")
+        {   
+            var date = new Date(value);
+            date.setHours(0,0,0,0);
+            var today = new Date();
+            today.setHours(0,0,0,0);
+            if (date > today)
+            {
+                setAlert("Not a valid date")
+                value = ""
+                setTimeout(() => setAlert(""), 2000)
+            }
+            newMRInward[name] = value;
+            setMRInward(newMRInward);
+            
+        }
+        else
+        {   
+            newMRInward[name] = value;
+            setMRInward(newMRInward);
+        }
     }
 
     var onProductChange = (event, index) =>
