@@ -21,8 +21,6 @@ import NewMR from './Components/Admin/NewMR';
 
 export const LoginDetails = createContext({});
 
-
-
 function App() {
   const [loggedIn, setLogin] = useState(false); 
   const [currentUser, setCurrentUser] = useState("");
@@ -31,7 +29,11 @@ function App() {
   var updateCart = (login) => {
     if (login.loggedIn)
     {
-      axios.put(`/users/${currentUser._id}/update/cart`, {cart: login.cart})
+      const config = {
+        headers: { Authorization: `Bearer ${login.currentUser.accessToken}` }
+      };
+      console.log("config", config)
+      axios.put(`/users/${currentUser._id}/update/cart`, {cart: login.cart}, config)
           .then((res) => {
             login.currentUser.cart = login.cart;
             login.setCurrentUser(login.currentUser);

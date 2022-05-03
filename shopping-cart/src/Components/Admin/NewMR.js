@@ -5,8 +5,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 
 function NewMR() {
-    
-
     const [MRPost, setMRPost] = useState({});
     const [MRItems, setMRItems] = useState([]);
     const [products, setProducts] = useState([{product:'', quantity:'', rate:'', amount:''}]);
@@ -25,6 +23,7 @@ function NewMR() {
         mr_items: [],
         mr_total: 0,
     });
+    const user = JSON.parse(localStorage.getItem('user'));
 
     var getData = async () => {
         try{
@@ -33,8 +32,7 @@ function NewMR() {
             var mrResponse = await axios.get('/mrinwards/mr-numbers' + MRInward.mr_no);
             setMRItems(mrResponse.data);
         }
-        catch(err)
-        {
+        catch(err){
             console.log(err);
         }
     }
@@ -65,7 +63,7 @@ function NewMR() {
     }
 
     useEffect(() => {
-        if(!contextData.loggedIn || !contextData.currentUser.admin)
+        if(!user || !user.admin)
         {
             navigate("/login");
         }

@@ -1,5 +1,7 @@
+require('dotenv').config();
 const config = require('./config.js');
 const express = require('express');
+const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
 var cors = require('cors')
 const fileUpload = require('express-fileupload');
@@ -8,6 +10,7 @@ const products  = require('./routes/products.route');
 const users = require('./routes/users.route');
 const orders = require('./routes/orders.route');
 const mrinwards = require('./routes/mrinward.route');
+const reviews = require('./routes/reviews.route');
 
 const app = express();
 
@@ -20,6 +23,7 @@ app.use('/users', users);
 app.use('/products', products);
 app.use('/orders', orders);
 app.use('/mrinwards', mrinwards);
+app.use('/reviews', reviews)
 app.all('*', function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "X-Requested-With");

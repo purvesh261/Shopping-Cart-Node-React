@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
 import CreateUser from './CreateUser';
-import { LoginDetails } from '../../App';
 import { useNavigate } from 'react-router-dom';
 import '../../App.css'
 import axios from 'axios';
+import { Typography, Pagination, Button } from '@mui/material';
 
 function AdminUsers() {
     const [users, setUsers] = useState([]);
@@ -14,10 +14,28 @@ function AdminUsers() {
     const [userAdded, setUserAdded] = useState(false);
     const navigate = useNavigate();
     var [deleteIndex, setDeleteIndex] = useState();
-    const contextData = useContext(LoginDetails);
+    const ROWS_PER_PAGE = 5;
+    const [tempUsers, setTempUsers] = useState([]);
+    const [page, setPage] = useState(1);
+    const [visibleUsers, setVisibleUsers] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    const onPageChange = (event, newPage) => {
+        var start = (newPage-1) * ROWS_PER_PAGE
+        setVisibleUsers(tempUsers.slice(start, start + ROWS_PER_PAGE));
+        setPage(newPage);
+        setDeleteIndex(null);
+        setEditIndex(null);
+        window.scrollTo(0,0);
+    }
 
     useEffect(() => {
-        if(!contextData.loggedIn || !contextData.currentUser.admin)
+        setVisibleUsers(tempUsers.slice(0, ROWS_PER_PAGE));
+    }, [tempUsers])
+
+    useEffect(() => {
+        if(!user || !user.admin)
         {
             navigate("/login");
         }
@@ -27,6 +45,7 @@ function AdminUsers() {
         axios.get('/users/')
           .then(res => {
             setUsers(res.data)
+            setTempUsers(res.data)
             setLoading(false);
           })
           .catch(err => {
@@ -51,10 +70,10 @@ function AdminUsers() {
         if(index != null)
         {
             setEditForm(
-                {username:users[index].username,
-                email:users[index].email,
-                admin:users[index].admin,
-                status:users[index].status}
+                {username:visibleUsers[index].username,
+                email:visibleUsers[index].email,
+                admin:visibleUsers[index].admin,
+                status:visibleUsers[index].status}
             );
         }
     }
@@ -83,14 +102,27 @@ function AdminUsers() {
     {
         axios.delete(`/users/${users[deleteIndex]._id}/delete`)
             .then(res => {
-                setLoading(true)
-                getUsers()
+                setLoading(true);
+                getUsers();
                 setDeleteIndex(null);
             })
             .catch(err => {
-                console.log("Error: " + err)
+                console.log("Error: " + err);
             })
     }
+
+    var search = (search) => {
+        setSearchQuery(search);
+        if(search === "")
+        {
+            setTempUsers([ ...users ]);
+        }
+        else
+        {
+            setTempUsers([ ...users ].filter((user) => user.username.toLowerCase().includes(search.toLowerCase())));
+        }
+    
+      }
 
     return (
         <>
@@ -101,6 +133,16 @@ function AdminUsers() {
                 </div>
                 <div className='col-md-8 col-sm-12 mt-5'>
                     <h3>Users</h3>
+                    <form>
+                        <div className="input-group search justify-content-center">
+                            <div className="form-outline w-75">
+                            <input type="search" className="form-control p-2" placeholder='Search by username' value={searchQuery} onChange={(e) => search(e.target.value)}/>
+                            </div>
+                            <button type="submit " className="rounded submit p-2 px-4 color-primary login-btn">
+                            Search
+                            </button>
+                        </div>
+                    </form>
                 
                     <div className="table-responsive">
                     {alert && <div className="alert alert-success m-3">{alert}</div>}
@@ -126,22 +168,24 @@ function AdminUsers() {
                     <tbody>
                     {
                         !loading ?
+                        <>
                         
-                            users.map((user, idx) => {
+                            {visibleUsers.map((user, idx) => {
+                                var key = (page - 1) * ROWS_PER_PAGE;
                                 return (
                                     <>
-                                    <tr key={idx}>
-                                        <td>{idx+1}</td>
+                                    <tr key={key + idx}>
+                                        <td>{key + idx + 1}</td>
                                         <td>{user.username}</td>
                                         <td>{user.email}</td>
                                         <td><input type="checkbox" checked={user.admin} /></td>
                                         <td><input type="checkbox" checked={user.status} /></td>
                                         <td>
-                                            <button className='btn btn-primary btn-margin' onClick={() => editIndex === idx? editUser(null): editUser(idx)}>Edit</button>
-                                            <button className='btn btn-danger btn-margin' onClick={() => setDeleteIndex(idx)}>Delete</button>
+                                            <button className='btn btn-primary btn-margin' onClick={() => editIndex === key + idx? editUser(null): editUser(key + idx)}>Edit</button>
+                                            <button className='btn btn-danger btn-margin' onClick={() => setDeleteIndex(key + idx)}>Delete</button>
                                         </td>
                                     </tr>
-                                    { editIndex === idx?
+                                    { editIndex === (key + idx)?
                                         <tr key="-1">
                                             <td colSpan="6" className='p-3'>
                                                 <form onSubmit={onSave}>
@@ -168,8 +212,16 @@ function AdminUsers() {
                                     : null}
                                     </>
                                     
-                                )
-                            })
+                                    )
+                                })}
+                                <Pagination
+                                    count={Math.ceil(tempUsers.length / ROWS_PER_PAGE)} 
+                                    page={page}
+                                    onChange={onPageChange}
+                                    color="primary" 
+                                    sx={{ margin:"auto", mt:3,mb:3}}
+                                />
+                                </>
                         :
                         <tr key="-1">
                             <td colSpan={6} className="text-center text-secondary p-5">

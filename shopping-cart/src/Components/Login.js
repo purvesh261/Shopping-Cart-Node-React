@@ -8,14 +8,15 @@ import { LoginDetails } from '../App.js';
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [alert, setAlert] = useState()
+  const [alert, setAlert] = useState();
   const navigate = useNavigate();
   const contextData = useContext(LoginDetails);
+  const user = JSON.parse(localStorage.getItem('user'));
 
   useEffect(() => {
-      if(contextData.loggedIn)
+      if(user)
       {
-        if(contextData.currentUser.admin)
+        if(user.admin)
         {
           navigate("/admin/users");
         }
@@ -29,10 +30,10 @@ function Login() {
   useEffect(() => {
     if (contextData.loggedIn === true)
     {
+      console.log(contextData.currentUser, "context");
       mergeCarts(contextData.currentUser.cart, contextData.cart);
       contextData.currentUser.admin? navigate("/admin/users"): navigate("/");
     }
-  
   }, [contextData.currentUser]);
 
   var mergeCarts = (userCart, guestCart) =>
@@ -69,7 +70,8 @@ function Login() {
           contextData.setLogin(true);
           
           contextData.setCurrentUser(res.data);
-          
+          localStorage.setItem('user', JSON.stringify(res.data));
+          localStorage.setItem('accessToken', res.data.accessToken);
         }
         else
         {

@@ -1,16 +1,35 @@
 import React, { useContext, useEffect, useState } from 'react';
 import '../App.css';
+import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { LoginDetails } from '../App.js';
 
 function Navbar()
 {
     const contextData = useContext(LoginDetails);
+    const user = JSON.parse(localStorage.getItem("user"));
     const loggedIn = contextData.loggedIn;
     const isAdmin = contextData.currentUser.admin;
     const navigate = useNavigate();
 
-
+    var logoutRequest = async (userId, accessToken) => {
+        console.log("contextdata", contextData)
+        const config = {
+            headers: { Authorization: `Bearer ${accessToken}` }
+        };
+        console.log("config", config)
+        try
+        {
+            await axios.post('/users/logout', {_id: userId}, config);
+            localStorage.clear();
+            navigate("/");
+        }
+        catch(err)
+        {
+            console.log("Error: " + err);
+        }
+        
+    }
     var logout = () =>
     {
         contextData.loggedIn = false;
@@ -18,7 +37,9 @@ function Navbar()
         contextData.setLogin(false);
         contextData.setCurrentUser("");
         contextData.setCart([]);
-        navigate("/");
+        logoutRequest(user._id, user.accessToken)
+        
+        
     }
 
     return(
@@ -28,8 +49,8 @@ function Navbar()
             <div className='navigation-links'>
                 
                     {
-                        loggedIn?
-                            isAdmin?
+                        user?
+                            user.admin?
                                 <ul>
                                     <Link to="/admin/users"><li>Users</li></Link>
                                     <Link to="/admin/products"><li>Products</li></Link>
@@ -41,7 +62,6 @@ function Navbar()
                                 <ul>
                                     <Link to="/"><li>Home</li></Link>
                                     <Link to="/cart"><li>Cart</li></Link>
-                                    {/* <Link to="/account"><li>{contextData.currentUser.username}</li></Link> */}
                                     <Link to="/account"><li>Orders</li></Link>
                                     <Link to="/"><li onClick={() => logout()}>Logout</li></Link>
                                 </ul>

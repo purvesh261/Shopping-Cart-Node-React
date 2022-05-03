@@ -18,7 +18,6 @@ export default function Home(props) {
         setProducts(res.data);
         setData(res.data);
         setCategories([ ...new Set(res.data.map((prods) => prods.category))]);
-        
       })
       .catch(err => {
         console.log(err);

@@ -11,7 +11,8 @@ let userSchema = new Schema({
     cart: [{
         product: {type: Schema.Types.ObjectId, ref: 'Product'},
         quantity: {type: Number, required: true}
-    }]
+    }],
+    refreshToken: {type: String}
 });
 
 module.exports = mongoose.model('User', userSchema);

@@ -4,9 +4,10 @@ import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 function Cart() {
   const contextData = useContext(LoginDetails);
-  const { cart } = contextData;
+  const [cart, setCart] = useState([]);
   const [total, setTotal] = useState({amount:0 ,tax:0, shipping:0, total:0});
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem('user'));
 
   var getTotal = () =>
   {
@@ -21,10 +22,24 @@ function Cart() {
     setTotal({amount:newAmount, tax:newTax, shipping:newShipping, total:newTotal});
   }
 
+  const getCart = async () => {
+    try{
+      var res = await axios.get(`http://localhost:5000/users/${user._id}/cart/`);
+      setCart(res.data);
+      console.log(res.data, "Res")
+    }
+    catch(err){
+      console.log(err)
+    }
+  }
+
   useEffect(() => {
-    getTotal();
+    getCart();
   }, []);
 
+  useEffect(() => {
+    getTotal();
+  }, [cart]);
 
   var changeQuantity = (event, index) => {
     cart[index].quantity = Number(event.target.value);
@@ -62,7 +77,7 @@ function Cart() {
     </div>
     
    
-    {cart.map((item, index) => {
+    {cart.length && cart.map((item, index) => {
         return(
         <div key={index} className="border cart-item">
             <div className="cart-item-details">

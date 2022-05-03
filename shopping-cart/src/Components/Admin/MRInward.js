@@ -2,25 +2,33 @@ import React, { useState, useEffect, useContext } from 'react';
 import { LoginDetails } from '../../App.js';
 import { Link, useNavigate } from 'react-router-dom';
 import '../../App.css';
+import { Pagination } from '@mui/material';
 import axios from 'axios';
 
 function MRInward() {
     const [loading, setLoading] = useState(true);
     const [MRInward, setMRInward] = useState();
+    const [tempMRs, setTempMRs] = useState([]);
     const [displayIndex, setDisplayIndex] = useState();
     const [deleteIndex, setDeleteIndex] = useState();
     const contextData = useContext(LoginDetails);
     const navigate = useNavigate();
     const [alert, setAlert] = useState("");
+    const ROWS_PER_PAGE = 5;
+    const [page, setPage] = useState(1);
+    const [visibleMRs, setVisibleMRs] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const user = JSON.parse(localStorage.getItem('user'));
 
     var getMRInwards = () => {
     axios.get('/mrinwards/')
         .then(res => {
-        setMRInward(res.data)
-        setLoading(false);
+            setMRInward(res.data);
+            setTempMRs(res.data);
+            setLoading(false);
         })
         .catch(err => {
-        console.log(err);
+            console.log(err);
         });
     }
 
@@ -33,11 +41,24 @@ function MRInward() {
     }
 
     useEffect(() => {
-    if(!contextData.loggedIn || !contextData.currentUser.admin)
-    {
-        navigate("/login");
+        setVisibleMRs(tempMRs.slice(0, ROWS_PER_PAGE));
+    }, [tempMRs]);
+
+    const onPageChange = (event, newPage) => {
+        var start = (newPage-1) * ROWS_PER_PAGE
+        setVisibleMRs(tempMRs.slice(start, start + ROWS_PER_PAGE));
+        setPage(newPage);
+        setDeleteIndex(null);
+        setDisplayIndex(null);
+        window.scrollTo(0, 0);
     }
-    getMRInwards();
+
+    useEffect(() => {
+      if(!user || !user.admin)
+      {
+          navigate("/login");
+      }
+      getMRInwards();
     }, []);
 
     var onDeleteYes = async () => 
@@ -88,21 +109,22 @@ function MRInward() {
                       <tbody>
                       {
                           !loading ?
-                            MRInward.map((mrinward, idx) => {
+                            visibleMRs.map((mrinward, idx) => {
+                                var key = (page - 1) * ROWS_PER_PAGE;
                                   return (
                                       <>
-                                      <tr key={idx}>
-                                          <td>{idx+1}</td>
+                                      <tr key={key+idx}>
+                                          <td>{key+idx+1}</td>
                                           <td>{mrinward.MRInwardNo}</td>
                                           <td>{formatDate(new Date(mrinward.MRInwardDate))}</td>
                                           <td>{mrinward.Supplier}</td>
                                           <td>₹ {mrinward.MRInwardTotal}</td>
                                           <td>
-                                              <button className='btn btn-primary btn-margin' onClick={() => displayIndex === idx? setDisplayIndex(null) : setDisplayIndex(idx)}>View Details</button>
-                                              <button className='btn btn-danger btn-margin' onClick={() => setDeleteIndex(idx)}>Delete</button>
+                                              <button className='btn btn-primary btn-margin' onClick={() => displayIndex === key + idx? setDisplayIndex(null) : setDisplayIndex(key + idx)}>View Details</button>
+                                              <button className='btn btn-danger btn-margin' onClick={() => setDeleteIndex(key + idx)}>Delete</button>
                                           </td>
                                       </tr>
-                                      { displayIndex === idx?
+                                      { displayIndex === key + idx?
                                           <tr key={-1}>
                                               <td colSpan="6" className='bg-secondary'>
                                                   <div className="card">
@@ -177,6 +199,13 @@ function MRInward() {
                       }
                       </tbody>
                     </table>
+                    <Pagination
+                        count={Math.ceil(tempMRs.length / ROWS_PER_PAGE)} 
+                        page={page}
+                        onChange={onPageChange}
+                        color="primary" 
+                        sx={{ margin:"auto", mt:3,mb:3}}
+                    />
                 </div>
             </div>
         </div>

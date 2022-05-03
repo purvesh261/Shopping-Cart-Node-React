@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LoginDetails } from '../../App.js';
 import '../../App.css';
+import { Pagination } from '@mui/material';
 import axios from 'axios';
 
 function AdminProducts() {
@@ -14,11 +15,31 @@ function AdminProducts() {
     var [deleteIndex, setDeleteIndex] = useState();
     const navigate = useNavigate();
     const contextData = useContext(LoginDetails);
+    const user = JSON.parse(localStorage.getItem('user'));
+    const ROWS_PER_PAGE = 5;
+    const [tempProducts, setTempProducts] = useState([]);
+    const [page, setPage] = useState(1);
+    const [visibleProducts, setVisibleProducts] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const onPageChange = (event, newPage) => {
+        var start = (newPage-1) * ROWS_PER_PAGE
+        setVisibleProducts(tempProducts.slice(start, start + ROWS_PER_PAGE));
+        setPage(newPage);
+        setDeleteIndex(null);
+        setDisplayIndex(null);
+        window.scrollTo(0,0);
+    }
+
+    useEffect(() => {
+        setVisibleProducts(tempProducts.slice(0, ROWS_PER_PAGE));
+    }, [tempProducts])
 
     var getProducts = () => {
         axios.get('/products/')
           .then(res => {
-            setProducts(res.data)
+            setProducts(res.data);
+            setTempProducts(res.data);
             setLoading(false);
           })
           .catch(err => {
@@ -27,7 +48,7 @@ function AdminProducts() {
     }
 
     useEffect(() => {
-        if(!contextData.loggedIn || !contextData.currentUser.admin)
+        if(!user || !user.admin)
         {
             navigate("/login");
         }
@@ -128,6 +149,18 @@ function AdminProducts() {
         setEdit(true);
     }
 
+    var search = (search) => {
+        setSearchQuery(search);
+        if(search === "")
+        {
+            setTempProducts([ ...products ]);
+        }
+        else
+        {
+            setTempProducts([ ...products ].filter((product) => product.name.toLowerCase().includes(search.toLowerCase()) || product._id === search));
+        }
+    }
+
     return (
         <>
         
@@ -137,6 +170,16 @@ function AdminProducts() {
                         <h2>Products</h2>
                         <Link to="/admin/products/new"><button className='btn btn-primary btn-create'>Add Product</button></Link>
                     </div>
+                    <form>
+                        <div className="input-group search justify-content-center">
+                            <div className="form-outline w-75">
+                            <input type="search" className="form-control p-2" placeholder='Search by product name or id' value={searchQuery} onChange={(e) => search(e.target.value)}/>
+                            </div>
+                            <button type="submit " className="rounded submit p-2 px-4 color-primary login-btn">
+                            Search
+                            </button>
+                        </div>
+                    </form>
                 
                     <div className="table-responsive">
                     {alert && <div className="alert alert-success m-3">{alert}</div>}
@@ -163,22 +206,23 @@ function AdminProducts() {
                     {
                         !loading ?
                         
-                          products.map((product, idx) => {
+                        visibleProducts.map((product, idx) => {
+                                var key = (page - 1) * ROWS_PER_PAGE;
                                 return (
                                     <>
-                                    <tr key={idx}>
-                                        <td>{idx+1}</td>
+                                    <tr key={key + idx}>
+                                        <td>{key + idx + 1}</td>
                                         <td>{product.name}</td>
                                         <td>₹ {product.price}/-</td>
                                         <td><input type="checkbox" checked={product.status} /></td>
                                         <td>
-                                            <button className='btn btn-primary btn-margin' onClick={() => displayDetails(idx)}>View Details</button>
+                                            <button className='btn btn-primary btn-margin' onClick={() => displayDetails(key + idx)}>View Details</button>
                                         </td>
                                         <td>
-                                            <button className='btn btn-danger btn-margin' onClick={() => setDeleteIndex(idx)}>Delete</button>
+                                            <button className='btn btn-danger btn-margin' onClick={() => setDeleteIndex(key + idx)}>Delete</button>
                                         </td>
                                     </tr>
-                                    { displayIndex === idx?
+                                    { displayIndex === (key + idx)?
                                         <tr key="-1">
                                             <td colSpan="6" className='bg-secondary'>
                                                   <div className="card">
@@ -251,6 +295,13 @@ function AdminProducts() {
                             </td>
                         </tr>
                     }
+                    <Pagination
+                        count={Math.ceil(tempProducts.length / ROWS_PER_PAGE)} 
+                        page={page}
+                        onChange={onPageChange}
+                        color="primary" 
+                        sx={{ margin:"auto", mt:3,mb:3}}
+                    />
                     </tbody>
                     
                 </table>

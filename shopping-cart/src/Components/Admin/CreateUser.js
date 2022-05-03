@@ -17,7 +17,8 @@ function CreateUser(props) {
     const validUsername = new RegExp('^[a-zA-Z0-9]{5,}$');
     const validPassword = new RegExp('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$');
     const validEmail = new RegExp('^[a-z0-9]+[\\._]?[a-z0-9]+[@]\\w+[.]\\w{2,3}$');
-  
+    const user = JSON.parse(localStorage.getItem('user'));
+    
     var userExists = () => {
       if(!username)
       {

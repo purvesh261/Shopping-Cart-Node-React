@@ -15,9 +15,10 @@ function AddProduct() {
     const [alert, setAlert] = useState("");
     const contextData = useContext(LoginDetails);
     const navigate = useNavigate();
+    const user = JSON.parse(localStorage.getItem('user'));
 
     useEffect(() => {
-        if(!contextData.loggedIn || !contextData.currentUser.admin)
+        if(!user || !user.admin)
         {
             navigate("/login");
         }
@@ -27,7 +28,6 @@ function AddProduct() {
         var allowedExtensions = /(\.jpg|\.jpeg|\.png)$/i;
         return true;
     }
-
 
     var onChangeHandler = (event) => {
         let {name, value} = event.target;

@@ -2,21 +2,49 @@ import React, { useState, useEffect, useContext } from 'react';
 import { LoginDetails } from '../../App.js';
 import { Link, useNavigate } from 'react-router-dom';
 import '../../App.css';
+import { Pagination } from '@mui/material';
 import axios from 'axios';
 
 function Sales() {
   const [loading, setLoading] = useState(true);
   const [sales, setSales] = useState();
+  const [tempSales, setTempSales] = useState([]);
   const [displayIndex, setDisplayIndex] = useState();
   const [deleteIndex, setDeleteIndex] = useState();
   const [alert, setAlert] = useState("");
   const contextData = useContext(LoginDetails);
   const navigate = useNavigate();
+  const ROWS_PER_PAGE = 5;
+  const [page, setPage] = useState(1);
+  const [visibleSales, setVisibleSales] = useState([]);
+  const user = JSON.parse(localStorage.getItem('user'));
+
+  const onPageChange = (event, newPage) => {
+      var start = (newPage-1) * ROWS_PER_PAGE
+      setVisibleSales(tempSales.slice(start, start + ROWS_PER_PAGE));
+      setPage(newPage);
+      setDeleteIndex(null);
+      setDisplayIndex(null);
+      window.scrollTo(0, 0);
+  }
+
+  useEffect(() => {
+      setVisibleSales(tempSales.slice(0, ROWS_PER_PAGE));
+  }, [tempSales])
+
+  useEffect(() => {
+      if(!user || !user.admin)
+      {
+          navigate("/login");
+      }
+      getSales();
+    }, []);
 
   var getSales = () => {
     axios.get('/orders/')
       .then(res => {
-        setSales(res.data)
+        setSales(res.data);
+        setTempSales(res.data);
         setLoading(false);
       })
       .catch(err => {
@@ -25,31 +53,24 @@ function Sales() {
   }
 
   function formatDate(date) {
-    const orderMonth = date.getMonth() + 1;
-    const monthString = orderMonth >= 10 ? orderMonth : `0${orderMonth}`;
-    const orderDate = date.getDate();
-    const dateString = orderDate >= 10 ? orderDate : `0${orderDate}`;
-    return `${dateString}/${monthString}/${date.getFullYear()}`;
-}
-
-  useEffect(() => {
-    if(!contextData.loggedIn || !contextData.currentUser.admin)
-    {
-        navigate("/login");
+        const orderMonth = date.getMonth() + 1;
+        const monthString = orderMonth >= 10 ? orderMonth : `0${orderMonth}`;
+        const orderDate = date.getDate();
+        const dateString = orderDate >= 10 ? orderDate : `0${orderDate}`;
+        return `${dateString}/${monthString}/${date.getFullYear()}`;
     }
-    getSales();
-  }, []);
+
 
   var onDeleteYes = () => 
     {
         axios.delete(`/orders/${sales[deleteIndex]._id}/delete`)
             .then(res => {
-                setLoading(true)
-                getSales()
+                setLoading(true);
+                getSales();
                 setDeleteIndex(null);
             })
             .catch(err => {
-                console.log("Error: " + err)
+                console.log("Error: " + err);
             })
     }
 
@@ -84,20 +105,21 @@ function Sales() {
                       <tbody>
                       {
                           !loading ?
-                            sales.map((order, idx) => {
+                            visibleSales.map((order, idx) => {
+                                var key = (page - 1) * ROWS_PER_PAGE;
                                   return (
                                       <>
-                                      <tr key={idx}>
-                                          <td>{idx+1}</td>
+                                      <tr key={key + idx}>
+                                          <td>{key + idx + 1}</td>
                                           <td>{order.user ? order.user.username : "[Deleted User]"}</td>
                                           <td>{formatDate(new Date(order.date))}</td>
                                           <td>₹ {order.total.total}/-</td>
                                           <td>
-                                              <button className='btn btn-primary btn-margin' onClick={() => displayIndex === idx? setDisplayIndex(null) : setDisplayIndex(idx)}>View Details</button>
-                                              <button className='btn btn-danger btn-margin' onClick={() => setDeleteIndex(idx)}>Delete</button>
+                                              <button className='btn btn-primary btn-margin' onClick={() => displayIndex === key + idx? setDisplayIndex(null) : setDisplayIndex(key + idx)}>View Details</button>
+                                              <button className='btn btn-danger btn-margin' onClick={() => setDeleteIndex(key + idx)}>Delete</button>
                                           </td>
                                       </tr>
-                                      { displayIndex === idx?
+                                      { displayIndex === key + idx?
                                           <tr key={-1}>
                                               <td colSpan="6" className='bg-secondary'>
                                                   <div className="card">
@@ -174,6 +196,13 @@ function Sales() {
                       }
                       </tbody>
                     </table>
+                    <Pagination
+                        count={Math.ceil(tempSales.length / ROWS_PER_PAGE)} 
+                        page={page}
+                        onChange={onPageChange}
+                        color="primary" 
+                        sx={{ margin:"auto", mt:3,mb:3}}
+                    />
                 </div>
             </div>
         </div>

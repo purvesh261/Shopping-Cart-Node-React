@@ -11,6 +11,8 @@ let productSchema = new Schema({
     status: {type: Boolean, required: true, default: true},
     images: {type: String, maxlength: 300, required: false},
     dateAdded: {type: Date, default: Date.now, required: true},
+    averageRating: { type: String, default: "0", required: true},
+    totalRatings: { type: Number, default: 0, required: true},
 });
 
 module.exports = mongoose.model('Product', productSchema);
