@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { LoginDetails } from '../App.js';
 import axios from 'axios';
 
@@ -7,13 +7,17 @@ function Checkout() {
     const [address, setAddress] = useState("");
     const [phone, setPhone] = useState("");
     const [alert, setAlert] = useState("");
+    const [paymentMode, setPaymentMode] = useState("online");
     const navigate = useNavigate();
     const contextData = useContext(LoginDetails);
+    const user = JSON.parse(localStorage.getItem("user"));
 
     useEffect(() => {
-        if(!contextData.loggedIn)
+        var user = JSON.parse(localStorage.getItem("user"));
+        if(user.cart.length < 1)
         {
-            navigate("/login");
+            console.log(user, "herer")
+            navigate('/');
         }
     }, []);
 
@@ -25,27 +29,43 @@ function Checkout() {
          }
     }
 
+    var getTotal = (cart) =>
+    {
+        var newAmount = 0;
+        for (let i = 0; i < cart.length; i++) {
+        newAmount += cart[i].product.price * cart[i].quantity;
+        }
+        var newTax = Number(newAmount * 0.1).toFixed(2);
+        var newShipping = 150;
+        var newTotal = Number(newAmount) + Number(newTax) + Number(newShipping);
+        newTotal = Number(newTotal).toFixed(2);
+        return {amount:newAmount, tax:newTax, shipping:newShipping, total:newTotal}
+    }
+
     var placeOrder = (order) =>
     {
+        contextData.order = order;
+        if(paymentMode === "online")
+        {
+            return navigate('/payment');
+        }
+
         axios.post('/orders/create', order)
             .then(res => {
-            contextData.currentUser.cart.forEach(product => {
-                axios.put(`http://localhost:5000/products/${product.product._id}/update/stock`, {
-                    orderQuantity: product.quantity
-                })
-                .then(res => {
-                    console.log(res);
-                    
-                })
-                .catch(err => {
-                    console.log(err);
-                })
-            });
-            contextData.currentUser.cart = [];
-            contextData.setCurrentUser(contextData.currentUser);
-            contextData.updateCart([]);
-            contextData.setCart([]);
-            navigate('/checkout/confirmation');
+                order.products.forEach(product => {
+                    axios.put(`http://localhost:5000/products/${product.product._id}/update/stock`, {
+                        orderQuantity: product.quantity
+                    })
+                    .then(res => {
+                        console.log(res);
+                        
+                    })
+                    .catch(err => {
+                        console.log(err);
+                    })
+                });
+
+                navigate('/checkout/confirmation');
             })
         .catch(err => {
             console.log(err);
@@ -53,35 +73,37 @@ function Checkout() {
     }
 
 
-    var submitOrder = (event) => 
+    var submitOrder = async (event) => 
     {
         event.preventDefault();
-            
+        var cartRes = await axios.get(`http://localhost:5000/users/${user._id}/cart`)
+        var cart = cartRes.data;
+        var total = getTotal(cart);
         var order = {
-            user: contextData.currentUser._id,
-            products: contextData.currentUser.cart,
-            total: contextData.total,
+            user: user._id,
+            products: cart,
+            total: total,
             address: address,
             phone: phone,
+            paymentMode: paymentMode,
         }
 
         var unavailableProducts = [];
-        order.products.forEach(product => {
+        cart.forEach(product => {
             axios.get(`http://localhost:5000/products/${product.product._id}`)
             .then(res => {
                 if(Number(res.data.stock) < Number(product.quantity))
                 {
                     unavailableProducts.push(res.data.name);
                 }
+
                 if(unavailableProducts.length > 0)
                 {
                     var alertMessage = "Following products are unavailable:\n";
                     unavailableProducts.forEach(product => {
                         alertMessage += product + "\n";
                     });
-
                     setAlert(alertMessage);
-
                 }
                 else
                 {
@@ -112,6 +134,17 @@ function Checkout() {
                     <div className='input'>
                         <label htmlFor='address'>Phone</label>
                         <input type="phone" className='form-control w-25' name="phone" value={phone} onChange={onPhoneChange} placeholder="Enter your phone number" required/>
+                    </div>
+                    <div className='input'>
+                        Payment method:<br/>
+                        <input className="form-check-input m-1" type="radio" name="flexRadioDefault" id="online" checked={paymentMode === "online"} onClick={() => setPaymentMode("online")}/>
+                        <label className="form-check-label" for="online">
+                            Online
+                        </label><br/>
+                        <input className="form-check-input m-1" type="radio" name="flexRadioDefault" id="cash" checked={paymentMode === "cash"} onClick={() => setPaymentMode("cash")}/>
+                        <label className="form-check-label" for="cash">
+                            Cash on Delivery
+                        </label>
                     </div>
                     <div className='input'>
                         <input type="submit" className='btn btn-warning' value="Place Order" />

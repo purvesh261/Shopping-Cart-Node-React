@@ -16,7 +16,7 @@ function Signup() {
   const [alert, setAlert] = useState()
   const contextData = useContext(LoginDetails);
   const navigate = useNavigate();
-  const validUsername = new RegExp('^[a-zA-Z0-9]{5,}$');
+  const validUsername = new RegExp('^[a-zA-Z0-9]{5,20}$');
   const validPassword = new RegExp('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$');
   const validEmail = new RegExp('^[a-z0-9]+[\\._]?[a-z0-9]+[@]\\w+[.]\\w{2,3}$');
 
@@ -70,7 +70,7 @@ function Signup() {
     }
     else if(!validUsername.test(username))
     {
-      setAlert("Username must be at least 5 characters long");
+      setAlert("Username must be alphanumeric and 5-20 characters long");
       setTimeout(() => setAlert(""),2000)
     }
     else if(!validEmail.test(email))
@@ -104,6 +104,8 @@ function Signup() {
         contextData.setLogin(true);
         contextData.setCurrentUser(res.data);
         contextData.setCart([]);
+        localStorage.setItem('user', JSON.stringify(res.data));
+        localStorage.setItem('accessToken', res.data.accessToken);
         navigate("/");
       })
     }
@@ -127,9 +129,13 @@ function Signup() {
                       onChange={e => setUsername(e.target.value)}>
                 </input>
 		      		</div>
-
               <div className="form-group">
-		      			<input type="text" className="form-control rounded-left mb-3 p-2" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)}></input>
+		      			<input type="text"
+                  className="form-control rounded-left mb-3 p-2"
+                  placeholder="Email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}>
+                  </input>
 		      		</div>
 
 	            <div className="form-group">
@@ -140,15 +146,28 @@ function Signup() {
                       onBlur={() => setPasswordValidation(false)}
                       onChange={(e) => setPassword(e.target.value)}>
                 </input>
-                { passwordValidation && <div className='text-secondary mb-1 small'>Password must be atleast 6 characters and must contain 1 lowercase character, 1 uppercase character, 1 digit and 1 special character.</div>}
+                { passwordValidation && 
+                  <div className='text-secondary mb-1 small'>Password must be atleast 6 characters and must contain 1 lowercase character, 1 uppercase character, 1 digit and 1 special character.</div>}
 	            </div>
 
               <div className="form-group">
-	              <input type="password" className="form-control rounded-left mb-3 p-2" placeholder="Confirm password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}></input>
+	              <input
+                  type="password"
+                  className="form-control rounded-left mb-3 p-2"
+                  placeholder="Confirm password"
+                  value={confirmPassword}
+                  onChange={e => setConfirmPassword(e.target.value)}>
+                  </input>
 	            </div>
 
               <div className="form-group">
-                <input type="checkbox" className="form-check-input" value={checked} onChange={setChecked}></input><span className="small"> I agree to the Terms and Conditions.</span>
+                <input
+                  type="checkbox"
+                  className="form-check-input"
+                  value={checked}
+                  onChange={setChecked}>
+                  </input>
+                    <span className="small"> I agree to the Terms and Conditions.</span>
               </div>
           
 	            <div className="form-group mt-3">

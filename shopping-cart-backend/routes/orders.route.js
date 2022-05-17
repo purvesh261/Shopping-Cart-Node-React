@@ -3,10 +3,11 @@ const router = express.Router();
 const controller = require('../controller/orders.controller');
 
 router.get('/', controller.getOrders);
+router.post('/payment', controller.createRazorpayOrder);
+router.post('/payment/callback', controller.razorpayCallback);
 router.get('/:id', controller.getOrderById);
 router.get('/:userid/user/', controller.getOrderByUser)
 router.post('/create', controller.createOrder);
 router.put('/:id/update', controller.updateOrder);
 router.delete('/:id/delete', controller.deleteOrder);
-
 module.exports = router;

@@ -10,15 +10,17 @@ function MyAccount() {
     const [ loading, setLoading ] = useState(true);
     const contextData = useContext(LoginDetails);
     const navigate = useNavigate();
+    const user = JSON.parse(localStorage.getItem("user")); 
 
     useEffect( () => {
-        if(!contextData.loggedIn)
+        if(!user)
         {
             navigate("/login");
         }
-        axios.get(`orders/${contextData.currentUser._id}/user`)
+        axios.get(`orders/${user._id}/user`)
             .then(res => {
-                setOrders([ ...res.data ]);
+                setOrders([ ...res.data ].reverse()
+                );
                 setLoading(false)
                 console.log(res.data);
             })
@@ -61,6 +63,7 @@ function MyAccount() {
                     </div>
                     <div>
                         <p className='text-secondary'>
+                            Payment Mode: {item.paymentMode === "cash" ? "Cash" : "Online"} <br/>
                             Amount: ₹ {item.total.amount}/-<br/>
                             Tax: ₹ {item.total.tax}/-<br/>
                             Shipping: ₹ {item.total.shipping}/-<br/>

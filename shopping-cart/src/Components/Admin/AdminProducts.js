@@ -21,6 +21,7 @@ function AdminProducts() {
     const [page, setPage] = useState(1);
     const [visibleProducts, setVisibleProducts] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
+    const [sort, setSort] = useState("Date: Descending");
 
     const onPageChange = (event, newPage) => {
         var start = (newPage-1) * ROWS_PER_PAGE
@@ -48,10 +49,6 @@ function AdminProducts() {
     }
 
     useEffect(() => {
-        if(!user || !user.admin)
-        {
-            navigate("/login");
-        }
         getProducts();
       }, []);
     
@@ -161,6 +158,44 @@ function AdminProducts() {
         }
     }
 
+    const sortItems = (sort) => {
+        setSort(sort);
+        setPage(1);
+        if(sort ===  "Username: Ascending")
+        {
+            setTempProducts([ ...tempProducts ].sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase()) ? 1 : -1));
+        }
+        else if(sort === "Username: Descending")
+        {
+            setTempProducts([ ...tempProducts ].sort((a, b) => (a.name.toLowerCase() < b.name.toLowerCase()) ? 1 : -1));
+        }
+        if(sort ===  "Date: Ascending")
+        {
+            setTempProducts([ ...tempProducts ].sort((a, b) => (a.dateAdded > b.dateAdded) ? 1 : -1));
+        }
+        else if(sort === "Date: Descending")
+        {
+            setTempProducts([ ...tempProducts ].sort((a, b) => (a.dateAdded < b.dateAdded) ? 1 : -1));
+        }
+        else if(sort === "Price: Ascending")
+        {
+            setTempProducts([ ...tempProducts ].sort((a, b) => (Number(a.price) > Number(b.price)) ? 1 : -1));
+        }
+        else if(sort === "Price: Descending")
+        {
+            setTempProducts([ ...tempProducts ].sort((a, b) => (Number(a.price) < Number(b.price)) ? 1 : -1));
+        }
+        else if(sort === "Rating: Ascending")
+        {
+            setTempProducts([ ...tempProducts ].sort((a, b) => (Number(a.averageRating) > Number(b.averageRating)) ? 1 : -1));
+        }
+        else if(sort === "Rating: Descending")
+        {
+            setTempProducts([ ...tempProducts ].sort((a, b) => (Number(a.averageRating) < Number(b.averageRating)) ? 1 : -1));
+        }
+    }
+    
+
     return (
         <>
         
@@ -168,19 +203,33 @@ function AdminProducts() {
                 <div className='col-12'>
                     <div className='head'>
                         <h2>Products</h2>
-                        <Link to="/admin/products/new"><button className='btn btn-primary btn-create'>Add Product</button></Link>
-                    </div>
-                    <form>
-                        <div className="input-group search justify-content-center">
-                            <div className="form-outline w-75">
-                            <input type="search" className="form-control p-2" placeholder='Search by product name or id' value={searchQuery} onChange={(e) => search(e.target.value)}/>
+                        <div>
+                            <div className="sortAdmin">
+                                <select value={sort} onChange={(e) => sortItems(e.target.value)}>
+                                    <option value="0">Sort by</option>
+                                    <option>Name: Ascending</option>
+                                    <option>Name: Descending</option>
+                                    <option>Date: Ascending</option>
+                                    <option>Date: Descending</option>
+                                    <option>Price: Ascending</option>
+                                    <option>Price: Descending</option>
+                                    <option>Rating: Ascending</option>
+                                    <option>Rating: Descending</option>
+                                </select>
+                            <Link to="/admin/products/new"><button className='btn btn-primary btn-create'>Add Product</button></Link>
                             </div>
-                            <button type="submit " className="rounded submit p-2 px-4 color-primary login-btn">
-                            Search
-                            </button>
                         </div>
-                    </form>
-                
+                    </div>
+                        <form>
+                            <div className="input-group search justify-content-center">
+                                <div className="form-outline w-75">
+                                <input type="search" className="form-control p-2" placeholder='Search by product name or id' value={searchQuery} onChange={(e) => search(e.target.value)}/>
+                                </div>
+                                <button type="submit " className="rounded submit p-2 px-4 color-primary login-btn">
+                                Search
+                                </button>
+                            </div>
+                        </form>
                     <div className="table-responsive">
                     {alert && <div className="alert alert-success m-3">{alert}</div>}
                     {deleteIndex != null &&
@@ -197,6 +246,7 @@ function AdminProducts() {
                             <th scope="col">#</th> 
                             <th scope="col">Name</th>
                             <th scope="col">Price</th>
+                            <th scope="col">Rating</th>
                             <th scope="col">Status</th>
                             <th scope="col">Details</th>
                             <th scope="col">Actions</th>
@@ -214,6 +264,7 @@ function AdminProducts() {
                                         <td>{key + idx + 1}</td>
                                         <td>{product.name}</td>
                                         <td>₹ {product.price}/-</td>
+                                        <td>{product.averageRating}</td>
                                         <td><input type="checkbox" checked={product.status} /></td>
                                         <td>
                                             <button className='btn btn-primary btn-margin' onClick={() => displayDetails(key + idx)}>View Details</button>
@@ -224,7 +275,7 @@ function AdminProducts() {
                                     </tr>
                                     { displayIndex === (key + idx)?
                                         <tr key="-1">
-                                            <td colSpan="6" className='bg-secondary'>
+                                            <td colSpan="7" className='bg-secondary'>
                                                   <div className="card">
                                                       <div className="card-header d-flex justify-content-between">   
                                                           <h5>Product# {product._id}</h5>
@@ -257,7 +308,7 @@ function AdminProducts() {
                                                                     </div>
                                                                     <div className="form-group mb-3">
                                                                         <label htmlFor="status">Status: </label>
-                                                                        <input type="checkbox" className="form-check-input" name="status" checked={editForm.status} value={editForm.status} onChange={onChangeHandler} required/>
+                                                                        <input type="checkbox" className="form-check-input" name="status" checked={editForm.status} value={editForm.status} onChange={onChangeHandler}/>
                                                                     </div>
                                                                     <button type="submit" className="btn btn-primary m-2">Save</button>
                                                                     <button type="button" className="btn btn-danger" onClick={() => setEdit(false)}>Cancel</button>
@@ -267,8 +318,10 @@ function AdminProducts() {
                                                                     <h6>Product: {product.name}</h6>
                                                                     <h6>Price: ₹ {product.price}/-</h6>
                                                                     <h6>Quantity: {product.stock}</h6>
-                                                                    <h6>Description: {product.description}</h6>
+                                                                    <h6>Description: {product.description ? product.description : "No description"}</h6>
                                                                     <h6>Category: {product.category}</h6>
+                                                                    <h6>Average Rating: {product.averageRating}</h6>
+                                                                    <h6>Total Ratings: {product.totalRatings}</h6>
                                                                     <h6>Status: {product.status ? "Active" : "Disabled"}</h6>
                                                                     <h6>Created On: {formatDate(new Date(product.dateAdded))}</h6>
                                                                 </>

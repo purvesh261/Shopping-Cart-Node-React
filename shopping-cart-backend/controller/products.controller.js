@@ -12,6 +12,16 @@ exports.getProducts = (req, res) => {
         });
 }
 
+exports.getActiveProducts = (req, res) => {
+    Product.find({"status": true})
+        .then(products => {
+            res.send(products);
+        })
+        .catch(err => {
+            res.send('Error: ' + err);
+        });
+}
+
 exports.getProductNames = (req, res) => {
     Product.find({},{_id:1, name:1})
         .then(products => {

@@ -13,7 +13,7 @@ export default function Home(props) {
   const [reRender, setReRender] = useState(false);
 
   useEffect(() => {
-    axios.get('/products/')
+    axios.get('/products/active')
       .then(res => {
         setProducts(res.data);
         setData(res.data);
@@ -30,19 +30,18 @@ export default function Home(props) {
   }, [data]);
 
 
-  var filterCategory = (category) => {
-    setFilter(category);
-    setReRender(!reRender);
-    if(category === "All")
-    {
-      setData(products);
-    }
-    else
-    {
-      setData(products.filter((product) => product.category === category));
-    }
-
+var filterCategory = (category) => {
+  setFilter(category);
+  setReRender(!reRender);
+  if(category === "All")
+  {
+    setData(products);
   }
+  else
+  {
+    setData(products.filter((product) => product.category === category));
+  }
+}
 
   var sortProducts = (sort) => {
     setSort(sort);

@@ -19,6 +19,7 @@ function AdminUsers() {
     const [page, setPage] = useState(1);
     const [visibleUsers, setVisibleUsers] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
+    const [sort, setSort] = useState("Date: Descending");
     const user = JSON.parse(localStorage.getItem('user'));
 
     const onPageChange = (event, newPage) => {
@@ -34,12 +35,7 @@ function AdminUsers() {
         setVisibleUsers(tempUsers.slice(0, ROWS_PER_PAGE));
     }, [tempUsers])
 
-    useEffect(() => {
-        if(!user || !user.admin)
-        {
-            navigate("/login");
-        }
-    },[]);
+
 
     var getUsers = () => {
         axios.get('/users/')
@@ -119,7 +115,7 @@ function AdminUsers() {
         }
         else
         {
-            setTempUsers([ ...users ].filter((user) => user.username.toLowerCase().includes(search.toLowerCase())));
+            setTempUsers([ ...users ].filter((user) => user.username.toLowerCase().includes(search.toLowerCase()) || user.email.toLowerCase().includes(search.toLowerCase())));
         }
     
       }
@@ -136,7 +132,7 @@ function AdminUsers() {
                     <form>
                         <div className="input-group search justify-content-center">
                             <div className="form-outline w-75">
-                            <input type="search" className="form-control p-2" placeholder='Search by username' value={searchQuery} onChange={(e) => search(e.target.value)}/>
+                            <input type="search" className="form-control p-2" placeholder='Search by username or email' value={searchQuery} onChange={(e) => search(e.target.value)}/>
                             </div>
                             <button type="submit " className="rounded submit p-2 px-4 color-primary login-btn">
                             Search

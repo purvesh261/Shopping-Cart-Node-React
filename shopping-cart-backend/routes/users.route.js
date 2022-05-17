@@ -9,7 +9,7 @@ router.post('/token', controller.token)
 router.get('/username/:username', controller.getUserByUsername);
 router.post('/', controller.createUser);
 router.put('/:id/update', controller.updateUser);
-router.put('/:id/update/cart', controller.authenticateToken, controller.updateCart);
+router.put('/:id/update/cart', controller.updateCart);
 router.delete('/:id/delete', controller.deleteUser);
 router.put('/:productID/cart/remove', controller.removeProductFromCart);
 router.post('/logout', controller.authenticateToken, controller.logout)

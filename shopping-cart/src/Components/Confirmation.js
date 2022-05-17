@@ -1,17 +1,39 @@
 import React,  { useContext, useEffect, useState } from 'react';
 import { LoginDetails } from "../App";
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 function Confirmation() {
     const contextData = useContext(LoginDetails);
     const navigate = useNavigate();
+    const user = JSON.parse(localStorage.getItem("user"));
 
     useEffect(() => {
-        if(!contextData.loggedIn)
+        if(!contextData.order)
         {
-            navigate("/login");
+            navigate("/");
         }
-    }, []);
+        
+        var user = JSON.parse(localStorage.getItem("user"));
+        contextData.order = null;
+        contextData.cart = [];
+        if(!contextData.currentUser){
+            contextData.currentUser = user;
+        }
+        contextData.currentUser.cart = [];
+        contextData.setCurrentUser(contextData.currentUser);
+        contextData.setCart([]);
+        axios.put(`/users/${user._id}/update/cart`, {cart: []})
+            .then(res => {
+                console.log("Cart updated");
+            })
+            .catch(err => {
+                console.log(err);
+            })
+
+
+
+    }, [])
     return (
     <div className='card w-50'>
         <div className='card-body'>

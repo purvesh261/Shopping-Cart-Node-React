@@ -66,6 +66,7 @@ exports.authenticate = (req, res) => {
                     user.save();
                     const sendData = { _id: user._id, 
                                         username: user.username,
+                                        email: user.email,
                                         admin: user.admin,
                                         status: user.status,
                                         cart: user.cart,
@@ -82,7 +83,7 @@ exports.authenticate = (req, res) => {
         .catch(err => {
             res.send('Error: ' + err);
         });
-}
+    }
 
 exports.token = (req, res) => {
     const refreshToken = req.body.token;
@@ -120,7 +121,7 @@ exports.createUser = (req, res) => {
             const refreshToken = jwt.sign(userData, process.env.REFRESH_TOKEN_SECRET);
             user.refreshToken = refreshToken;
             user.save();
-            const sendData = { _id: user._id, username: user.username, admin: user.admin, status: user.status, cart: user.cart, accessToken: accessToken, refreshToken: refreshToken };
+            const sendData = { _id: user._id, username: user.username, email: user.email, admin: user.admin, status: user.status, cart: user.cart, accessToken: accessToken, refreshToken: refreshToken };
             res.json(sendData);
         })
         .catch(err => {

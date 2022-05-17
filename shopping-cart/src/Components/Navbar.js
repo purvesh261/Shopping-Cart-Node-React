@@ -8,8 +8,6 @@ function Navbar()
 {
     const contextData = useContext(LoginDetails);
     const user = JSON.parse(localStorage.getItem("user"));
-    const loggedIn = contextData.loggedIn;
-    const isAdmin = contextData.currentUser.admin;
     const navigate = useNavigate();
 
     var logoutRequest = async (userId, accessToken) => {
@@ -37,9 +35,9 @@ function Navbar()
         contextData.setLogin(false);
         contextData.setCurrentUser("");
         contextData.setCart([]);
-        logoutRequest(user._id, user.accessToken)
-        
-        
+        localStorage.clear();
+        navigate("/")
+        // logoutRequest(user._id, user.accessToken)
     }
 
     return(

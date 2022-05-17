@@ -1,23 +1,8 @@
-import logo from './logo.svg';
 import './App.css';
 import { useState, createContext } from 'react';
 import axios from 'axios';
-import { BrowserRouter as Router, Route, Routes, Navigate, Link, Switch } from 'react-router-dom';
+import { ROUTES, RenderRouter } from './routes';
 import Navbar from './Components/Navbar';
-import Home from './Components/Home';
-import Cart from './Components/Cart';
-import Checkout from './Components/Checkout';
-import Confirmation from './Components/Confirmation';
-import MyAccount from './Components/MyAccount';
-import Login from './Components/Login';
-import SignUp from './Components/SignUp';
-import AdminUsers from './Components/Admin/AdminUsers';
-import AdminProducts from './Components/Admin/AdminProducts';
-import AddProduct from './Components/Admin/AddProduct';
-import Sales from './Components/Admin/Sales';
-import MRInward from './Components/Admin/MRInward';
-import NewMR from './Components/Admin/NewMR';
-
 
 export const LoginDetails = createContext({});
 
@@ -25,16 +10,21 @@ function App() {
   const [loggedIn, setLogin] = useState(false); 
   const [currentUser, setCurrentUser] = useState("");
   const [cart, setCart] = useState([]);
+  const user = JSON.parse(localStorage.getItem("user")); 
 
   var updateCart = (login) => {
-    if (login.loggedIn)
+    var user = JSON.parse(localStorage.getItem("user")); 
+    console.log("updating cart...", user)
+    if (user)
     {
       const config = {
-        headers: { Authorization: `Bearer ${login.currentUser.accessToken}` }
+        headers: { Authorization: `Bearer ${user.accessToken}` }
       };
-      console.log("config", config)
-      axios.put(`/users/${currentUser._id}/update/cart`, {cart: login.cart}, config)
+      axios.put(`/users/${user._id}/update/cart`, {cart: login.currentUser.cart})
           .then((res) => {
+            console.log(res);
+            user.cart = login.cart;
+            localStorage.setItem("user", JSON.stringify(user))
             login.currentUser.cart = login.cart;
             login.setCurrentUser(login.currentUser);
             setCart(login.cart);
@@ -44,8 +34,6 @@ function App() {
           })
     }
   }
-
-
 
   const userObject = {
     loggedIn: loggedIn,
@@ -58,15 +46,16 @@ function App() {
   }
 
   return (
-    <Router>
       <LoginDetails.Provider value={userObject}>
       <div className="App">
         <Navbar />
-        <Routes>
+        <RenderRouter routes={ROUTES} />
+        {/* <Routes>
           <Route path="/" element={<Home />}/>
           <Route path="/cart" element={<Cart />}/>
           <Route path="/checkout" element={<Checkout />}/> 
           <Route path="/checkout/confirmation" element={<Confirmation />} />
+          <Route path="/payment" element={<Payment />}/>
           <Route path="/login" element={<Login/>}/>
           <Route path="/sign-up" element={<SignUp/>}/>
           <Route path="/account" element={<MyAccount />}/>
@@ -78,10 +67,9 @@ function App() {
           <Route path="/admin/mrinward/new" element={<NewMR />}/>
           <Route path="/admin/mrinward/:mrid/edit" element={<NewMR />}/>
           <Route path="*" element={<h3>404 - Page not found</h3>}/>
-        </Routes>
+        </Routes> */}
       </div>
       </LoginDetails.Provider>
-    </Router>
     
   );
 }

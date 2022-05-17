@@ -79,6 +79,10 @@ function ProductCard(props) {
         
         if(contextData.loggedIn)
         {
+            if(!contextData.currentUser)
+            {
+            contextData.currentUser = user;
+            }
             contextData.currentUser.cart = contextData.cart;
             contextData.setCurrentUser(contextData.currentUser);
             contextData.updateCart(contextData);
@@ -97,7 +101,7 @@ function ProductCard(props) {
                     <h5 className="card-title">{product.name}</h5>
                     <p className="card-text text-secondary">{product.description ? product.description : product.category}</p>
                     <h5 className="card-text">Price: ₹ {product.price}/-</h5>
-                    {product.stock > 0? <h6 className='card-text'>{product.stock} left</h6> : <h6 className='card-text text-danger'>Out of stock</h6>}
+                    {product.stock > 0? <h6 className='card-text'>{product.stock <= 10 ? <span className='text-danger'>{product.stock} left</span> : <span className='text-secondary'>In stock</span>}</h6> : <h6 className='card-text text-danger'>Out of stock</h6>}
                     <Stack direction="row" sx={{mb:1}}>
                         <Rating name="read-only" value={Number(product.averageRating)} precision={0.25} readOnly />
                         <Typography variant="body2" noWrap color="text.secondary" sx={{ml:1}}>
@@ -131,18 +135,6 @@ function ProductCard(props) {
             aria-describedby="modal-modal-description"
         >
             <Box sx={modalStyle}>
-                {/* <Typography id="modal-modal-title" variant="h5" component="h2">
-                    Reviews
-                </Typography>
-                <Typography id="modal-modal-subtitle" variant="h6" component="h2">
-                    Your review
-                </Typography>
-                <Typography id="modal-modal-subtitle" variant="h6" component="h2">
-                    User reviews
-                </Typography>
-                <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                    
-                </Typography> */}
                 <ProductReviews product={product}/>
             </Box>
         </Modal>

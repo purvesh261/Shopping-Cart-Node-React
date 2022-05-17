@@ -11,6 +11,7 @@ function MRInward() {
     const [tempMRs, setTempMRs] = useState([]);
     const [displayIndex, setDisplayIndex] = useState();
     const [deleteIndex, setDeleteIndex] = useState();
+    const [sort, setSort] = useState("Date: Descending");
     const contextData = useContext(LoginDetails);
     const navigate = useNavigate();
     const [alert, setAlert] = useState("");
@@ -24,7 +25,8 @@ function MRInward() {
     axios.get('/mrinwards/')
         .then(res => {
             setMRInward(res.data);
-            setTempMRs(res.data);
+            setTempMRs(res.data.sort((a, b) => (a.MRInwardDate < b.MRInwardDate) ? 1 : -1));
+
             setLoading(false);
         })
         .catch(err => {
@@ -54,10 +56,6 @@ function MRInward() {
     }
 
     useEffect(() => {
-      if(!user || !user.admin)
-      {
-          navigate("/login");
-      }
       getMRInwards();
     }, []);
 
@@ -77,13 +75,53 @@ function MRInward() {
         }
     }
 
+    const sortItems = (sort) => {
+        setSort(sort);
+        setPage(1);
+        if(sort ===  "Date: Ascending")
+        {
+            setTempMRs([ ...tempMRs ].sort((a, b) => (a.MRInwardDate > b.MRInwardDate) ? 1 : -1));
+        }
+        else if(sort === "Date: Descending")
+        {
+            setTempMRs([ ...tempMRs ].sort((a, b) => (a.MRInwardDate < b.MRInwardDate) ? 1 : -1));
+        }
+        else if(sort === "Amount: Ascending")
+        {
+            setTempMRs([ ...tempMRs ].sort((a, b) => (Number(a.MRInwardTotal) > Number(b.MRInwardTotal)) ? 1 : -1));
+        }
+        else if(sort === "Amount: Descending")
+        {
+            setTempMRs([ ...tempMRs ].sort((a, b) => (Number(a.MRInwardTotal) < Number(b.MRInwardTotal)) ? 1 : -1));
+        }
+        else if(sort === "Supplier: Ascending")
+        {
+            setTempMRs([ ...tempMRs ].sort((a, b) => a.Supplier.toLowerCase() > b.Supplier.toLowerCase() ? 1 : -1));
+        }
+        else if(sort === "Supplier: Descending")
+        {
+            setTempMRs([ ...tempMRs ].sort((a, b) => a.Supplier.toLowerCase() < b.Supplier.toLowerCase() ? 1 : -1));
+        }
+    }
+
     return (
       <>
         <div className='row'>
             <div className='col-12'>
                 <div className='head'>
                     <h2>MR Inward</h2>
+                    <div className="sortAdmin">
+                    <select value={sort} onChange={(e) => sortItems(e.target.value)}>
+                        <option value="0">Sort by</option>
+                        <option>Date: Ascending</option>
+                        <option>Date: Descending</option>
+                        <option>Amount: Ascending</option>
+                        <option>Amount: Descending</option>
+                        <option>Supplier: Ascending</option>
+                        <option>Supplier: Descending</option>
+                    </select>
                     <Link to="/admin/mrinward/new"><button className='btn btn-primary btn-create'>Create MR</button></Link>
+                    </div>
                 </div>
                 <div className="table-responsive">
                     {alert && <div className="alert alert-success m-3">{alert}</div>}

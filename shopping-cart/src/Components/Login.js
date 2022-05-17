@@ -51,7 +51,8 @@ function Login() {
     contextData.setCart(newCart);
     contextData.currentUser.cart = newCart;
     contextData.setCurrentUser(contextData.currentUser);
-    contextData.updateCart(newCart);
+    console.log(contextData, "UPDATED CARTS")
+    contextData.updateCart(contextData);
   }
 
   var onLogin = (event) => 
@@ -68,7 +69,6 @@ function Login() {
         if (!res.data.error)
         {
           contextData.setLogin(true);
-          
           contextData.setCurrentUser(res.data);
           localStorage.setItem('user', JSON.stringify(res.data));
           localStorage.setItem('accessToken', res.data.accessToken);
@@ -91,13 +91,28 @@ function Login() {
             </div>}
 						<form onSubmit={onLogin}>
 		      		<div className="form-group">
-		      			<input type="text" className="form-control rounded-left mb-3 p-2" placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} required></input>
+		      			<input type="text"
+                className="form-control rounded-left mb-3 p-2"
+                placeholder="Username"
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+                required>
+                </input>
 		      		</div>
 	            <div className="form-group">
-	              <input type="password" className="form-control rounded-left mb-3 p-2" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required></input>
+	              <input type="password"
+                className="form-control rounded-left mb-3 p-2"
+                placeholder="Password"
+                value={password}
+                onChange={e => setPassword(e.target.value)} required>
+                </input>
 	            </div>
 	            <div className="form-group mt-3">
-	            	<button type="submit" className="rounded submit p-2 px-4 w-100 color-primary">Login</button>
+	            	<button
+                  type="submit"
+                  className="rounded submit p-2 px-4 w-100 color-primary">
+                    Login
+                </button>
 	            </div>
               <div className="form-group mt-3">
                 <Link to="/sign-up">Create an account</Link>

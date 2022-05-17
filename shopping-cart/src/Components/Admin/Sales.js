@@ -12,6 +12,7 @@ function Sales() {
   const [displayIndex, setDisplayIndex] = useState();
   const [deleteIndex, setDeleteIndex] = useState();
   const [alert, setAlert] = useState("");
+  const [sort, setSort] = useState("Date: Descending");
   const contextData = useContext(LoginDetails);
   const navigate = useNavigate();
   const ROWS_PER_PAGE = 5;
@@ -33,24 +34,41 @@ function Sales() {
   }, [tempSales])
 
   useEffect(() => {
-      if(!user || !user.admin)
-      {
-          navigate("/login");
-      }
-      getSales();
+    getSales();
     }, []);
 
   var getSales = () => {
     axios.get('/orders/')
       .then(res => {
         setSales(res.data);
-        setTempSales(res.data);
+        setTempSales(res.data.sort((a, b) => (a.date < b.date) ? 1 : -1));
         setLoading(false);
       })
       .catch(err => {
         console.log(err);
       });
   }
+
+  const sortItems = (sort) => {
+        setSort(sort);
+        setPage(1);
+        if(sort ===  "Date: Ascending")
+        {
+            setTempSales([ ...tempSales ].sort((a, b) => (a.date > b.date) ? 1 : -1));
+        }
+        else if(sort === "Date: Descending")
+        {
+            setTempSales([ ...tempSales ].sort((a, b) => (a.date < b.date) ? 1 : -1));
+        }
+        else if(sort === "Amount: Ascending")
+        {
+            setTempSales([ ...tempSales ].sort((a, b) => (Number(a.total.total) > Number(b.total.total)) ? 1 : -1));
+        }
+        else if(sort === "Amount: Descending")
+        {
+            setTempSales([ ...tempSales ].sort((a, b) => (Number(a.total.total) < Number(b.total.total)) ? 1 : -1));
+        }
+    }
 
   function formatDate(date) {
         const orderMonth = date.getMonth() + 1;
@@ -81,6 +99,15 @@ function Sales() {
             <div className='col-12'>
                 <div className='head'>
                     <h2>Sales</h2>
+                    <div className="sortAdmin">
+                    <select value={sort} onChange={(e) => sortItems(e.target.value)}>
+                        <option value="0">Sort by</option>
+                        <option>Date: Ascending</option>
+                        <option>Date: Descending</option>
+                        <option>Amount: Ascending</option>
+                        <option>Amount: Descending</option>
+                    </select>
+                    </div>
                 </div>
                 <div className="table-responsive">
                     {alert && <div className="alert alert-success m-3">{alert}</div>}

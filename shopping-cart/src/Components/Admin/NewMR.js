@@ -63,10 +63,6 @@ function NewMR() {
     }
 
     useEffect(() => {
-        if(!user || !user.admin)
-        {
-            navigate("/login");
-        }
         if(mrid)
         {
             setEditing(true);

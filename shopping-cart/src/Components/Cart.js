@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { LoginDetails } from '../App';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
+
 function Cart() {
   const contextData = useContext(LoginDetails);
   const [cart, setCart] = useState([]);
@@ -23,14 +24,29 @@ function Cart() {
   }
 
   const getCart = async () => {
-    try{
-      var res = await axios.get(`http://localhost:5000/users/${user._id}/cart/`);
-      setCart(res.data);
-      console.log(res.data, "Res")
+    if(user)
+    {
+      try{
+        var res = await axios.get(`http://localhost:5000/users/${user._id}/cart/`);
+        setCart(res.data);
+        contextData.setCart(res.data);
+        user.cart = res.data;
+        localStorage.setItem("user", JSON.stringify(user));
+        if(!contextData.currentUser)
+        {
+          contextData.currentUser = user;
+        }
+        contextData.currentUser.cart = res.data;
+        contextData.setCurrentUser(contextData.currentUser);
+      }
+      catch(err){
+        console.log(err)
+      }
     }
-    catch(err){
-      console.log(err)
+    else {
+      setCart(contextData.cart)
     }
+    
   }
 
   useEffect(() => {
@@ -48,7 +64,7 @@ function Cart() {
     {
         contextData.currentUser.cart = cart;
         contextData.setCurrentUser(contextData.currentUser);
-        contextData.updateCart(contextData)
+        contextData.updateCart(contextData);
     }
     getTotal();
   };
@@ -68,7 +84,7 @@ function Cart() {
   var checkOut = () =>
   {
     contextData.total = total;
-    contextData.loggedIn ? navigate('/checkout') : navigate('/login');
+    user ? navigate('/checkout') : navigate('/login');
   }
   return (
     <>
@@ -120,7 +136,7 @@ function Cart() {
             <h4 className='text-warning'>₹ {total.total}</h4>
           </div>
         </div>
-        <button className="btn btn-warning offset-8" onClick={checkOut}>{contextData.loggedIn? "Proceed to Checkout": "Login and Checkout"}</button>
+        <button className="btn btn-warning offset-8" onClick={checkOut}>{user? "Proceed to Checkout": "Login and Checkout"}</button>
       </div>
       :
       <div className="border text-center cart-total">
